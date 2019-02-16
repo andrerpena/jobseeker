@@ -4,8 +4,8 @@
 module.exports = {
   coverageDirectory: "coverage",
   // An array of file extensions your modules use
-  moduleFileExtensions: ["ts", "tsx", "js", "json"],
-  testMatch: ["**/*.test.+(ts|tsx|js)"],
+  moduleFileExtensions: ["ts", "tsx", "js"],
+  testMatch: ["lib/**/__tests__/*.+(ts|tsx|js)"],
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest"
   }

@@ -1,12 +1,29 @@
 import { BotLogger, Logger } from "./logger";
 import colors from "colors";
+import * as puppeteer from "puppeteer";
 
 export interface Job {
   title: String;
   tags: string[];
   description: string;
-  remoteDetails?: string;
-  salaryRange?: string[];
+  remoteDetails?: RemoteDetails;
+  salaryRange?: SalaryRange;
+}
+
+export interface RemoteDetails {
+  raw: string;
+  requiredLocation?: string;
+  preferredLocation?: string;
+  preferredTimeZone?: number;
+  preferredTimeZoneTolerance?: number;
+}
+
+export interface SalaryRange {
+  exact?: number;
+  min?: number;
+  max?: number;
+  currency?: string;
+  equity?: boolean;
 }
 
 export interface JobDraft {
@@ -19,7 +36,11 @@ export interface Bot {
 
   getJobDrafts(logger: Logger): Promise<Array<JobDraft | null>>;
 
-  getJob(draft: JobDraft, logger: Logger): Promise<Job | null>;
+  getJob(
+    page: puppeteer.Page,
+    draft: JobDraft,
+    logger: Logger
+  ): Promise<Job | null>;
 
   saveJob(job: Job, logger: Logger): Promise<void>;
 }
