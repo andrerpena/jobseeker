@@ -1,5 +1,4 @@
 import { Stackoverflow } from "../bots/stackoverflow";
-import { JobDraft } from "../lib/bots";
 import puppeteer from "puppeteer";
 
 const JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS =
@@ -21,17 +20,17 @@ describe("Stackoverflow", () => {
   afterAll(async () => {
     return browser.close();
   });
-  describe("isRemote", () => {
+  describe("shouldCapture", () => {
     it("should work when remote", async () => {
       const page = await browser.newPage();
       await page.goto(JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY);
-      const isRemote = await stackoverflow.isRemote(page);
+      const isRemote = await stackoverflow.shouldCapture(page);
       expect(isRemote).toEqual(true);
     });
     it("should work when NOT remote", async () => {
       const page = await browser.newPage();
       await page.goto(JOB_NO_REMOTE_URL);
-      const isRemote = await stackoverflow.isRemote(page);
+      const isRemote = await stackoverflow.shouldCapture(page);
       expect(isRemote).toEqual(false);
     });
   });
@@ -84,6 +83,27 @@ describe("Stackoverflow", () => {
       await page.goto(JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS);
       const remoteDetails = await stackoverflow.getLocationDetails(page);
       expect(remoteDetails).toEqual(null);
+    });
+  });
+  describe("getSalaryDetails", () => {
+    it("should work", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_REMOTE_URL_WITH_SALARY);
+      const salaryDetails = await stackoverflow.getSalaryDetails(page);
+      expect(salaryDetails).toEqual({
+        currency: "$",
+        equity: false,
+        max: 60000,
+        min: 35000,
+        raw:
+          "                                $35k - 60k                            "
+      });
+    });
+    it("should work when there is no salary", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY);
+      const salaryDetails = await stackoverflow.getSalaryDetails(page);
+      expect(salaryDetails).toEqual(null);
     });
   });
 });

@@ -1,4 +1,4 @@
-import { Bot, Job, JobDraft, RemoteDetails, SalaryRange } from "../lib/bots";
+import { Bot, Job, JobDraft, RemoteDetails, SalaryDetails } from "../lib/bots";
 import Parser from "rss-parser";
 import { BotLogger } from "../lib/logger";
 import * as puppeteer from "puppeteer";
@@ -13,12 +13,18 @@ import { getMarkdownFromHtml } from "../lib/markdown";
 let parser = new Parser();
 
 export class Stackoverflow implements Bot {
-  extractLocationDetails(remoteDetails: string): any {
+  extractLocationDetails(remoteDetails: string): RemoteDetails {
     const result: RemoteDetails = {
       raw: remoteDetails
     };
+    if (!remoteDetails) {
+      return result;
+    }
+    const normalizedRemoteDetails = remoteDetails.replace(/(\r\n|\n|\r)/gm, "");
     // match should be something like this ["(GMT+00:00) London", "+", "00", "00", "London"]
-    const match1 = remoteDetails.match(/(?:\(GMT([+,-])(\d+):(\d+)\))\s*(.*)/);
+    const match1 = normalizedRemoteDetails.match(
+      /(?:\(GMT([+,-])(\d+):(\d+)\))\s*(.*)/
+    );
     if (!match1) {
       return result;
     }
@@ -34,11 +40,34 @@ export class Stackoverflow implements Bot {
     return result;
   }
 
-  // refineRemoteDetails(remoteDetails: RemoteDetails, jobDescription: string): RemoteDetails {
+  extractSalaryDetails(salary: string): SalaryDetails {
+    const result: SalaryDetails = {
+      raw: salary
+    };
+    if (!salary) {
+      return result;
+    }
+    const normalizedSalary = salary.replace(/(\r\n|\n|\r)/gm, "");
+    const match1 = normalizedSalary.match(
+      /([^\d]+)(?:(\d+)k\s+\-\s+(\d+)k)[\s+|]*(Equity)?/
+    );
+    if (!match1) {
+      return result;
+    }
+    return {
+      raw: normalizedSalary,
+      currency: match1[1].trim(),
+      min: parseFloat(match1[2]) * 1000,
+      max: parseFloat(match1[3]) * 1000,
+      equity: match1.length > 4 ? !!match1[4] : false
+    };
+  }
+
+  // refineRemoteDetails(locationDetails: RemoteDetails, jobDescription: string): RemoteDetails {
   //
   // }
 
-  async isRemote(page: puppeteer.Page): Promise<boolean> {
+  async shouldCapture(page: puppeteer.Page): Promise<boolean> {
     const jobDetailsHeader = await page.$(".job-details--header");
     if (!jobDetailsHeader) {
       throw new Error("jobDetailsHeader was not supposed to be null");
@@ -68,7 +97,7 @@ export class Stackoverflow implements Bot {
     return Promise.all(tags.map(t => getTextFromElement(page, t)));
   }
 
-  async getDescription(page: puppeteer.Page) {
+  async getDescription(page: puppeteer.Page): Promise<string> {
     const details = await page.$(".job-details--content");
     if (!details) {
       throw new Error("details was not supposed to be null");
@@ -93,7 +122,7 @@ export class Stackoverflow implements Bot {
 
   async getLocationDetails(
     page: puppeteer.Page
-  ): Promise<RemoteDetails | null> {
+  ): Promise<RemoteDetails | undefined> {
     const overview = await page.$("#overview-items");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
@@ -103,12 +132,12 @@ export class Stackoverflow implements Bot {
       "Remote details"
     );
     if (!remoteDetailsTitle) {
-      return null;
+      return undefined;
     }
 
     const remoteDetails = await getNextElement(page, remoteDetailsTitle);
     if (!remoteDetails) {
-      throw new Error("remoteDetails was not supposed to be null");
+      throw new Error("locationDetails was not supposed to be null");
     }
     const timeZoneTitle = await getElementWithExactText(
       remoteDetails,
@@ -122,11 +151,22 @@ export class Stackoverflow implements Bot {
       const timeZoneText = await getTextFromElement(page, timeZone);
       return this.extractLocationDetails(timeZoneText);
     }
-    return null;
+    return undefined;
   }
 
-  async getSalaryDetails(page: puppeteer.Page): Promise<SalaryRange | null> {
-    return null;
+  async getSalaryDetails(
+    page: puppeteer.Page
+  ): Promise<SalaryDetails | undefined> {
+    const overview = await page.$(".job-details--header ");
+    if (!overview) {
+      throw new Error("overview was not supposed to be null");
+    }
+    const salary = await overview.$(".-salary");
+    if (!salary) {
+      return undefined;
+    }
+    const salaryText = await getTextFromElement(page, salary);
+    return this.extractSalaryDetails(salaryText);
   }
 
   async getJobDrafts(logger: BotLogger): Promise<Array<JobDraft | null>> {
@@ -147,17 +187,6 @@ export class Stackoverflow implements Bot {
         };
       })
     );
-  }
-
-  async getJob(page: puppeteer.Page, job: JobDraft): Promise<Job | null> {
-    await page.goto(job.link);
-    return Promise.resolve(null);
-
-    // title: String;
-    // tags: string[];
-    // description: string;
-    // remoteDetails?: string;
-    // salaryRange?: string[];
   }
 
   async saveJob(job: Job): Promise<void> {

@@ -6,8 +6,8 @@ export interface Job {
   title: String;
   tags: string[];
   description: string;
-  remoteDetails?: RemoteDetails;
-  salaryRange?: SalaryRange;
+  locationDetails?: RemoteDetails;
+  salaryDetails?: SalaryDetails;
 }
 
 export interface RemoteDetails {
@@ -18,7 +18,8 @@ export interface RemoteDetails {
   preferredTimeZoneTolerance?: number;
 }
 
-export interface SalaryRange {
+export interface SalaryDetails {
+  raw: string;
   exact?: number;
   min?: number;
   max?: number;
@@ -36,13 +37,19 @@ export interface Bot {
 
   getJobDrafts(logger: Logger): Promise<Array<JobDraft | null>>;
 
-  getJob(
-    page: puppeteer.Page,
-    draft: JobDraft,
-    logger: Logger
-  ): Promise<Job | null>;
-
   saveJob(job: Job, logger: Logger): Promise<void>;
+
+  shouldCapture(page: puppeteer.Page): Promise<boolean>;
+
+  getTitle(page: puppeteer.Page): Promise<string>;
+
+  getTags(page: puppeteer.Page): Promise<string[]>;
+
+  getDescription(page: puppeteer.Page): Promise<string>;
+
+  getLocationDetails(page: puppeteer.Page): Promise<RemoteDetails | undefined>;
+
+  getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails | undefined>;
 }
 
 export class ConsoleBotLogger implements BotLogger {
@@ -80,9 +87,52 @@ export class ConsoleBotLogger implements BotLogger {
 
 export class BotManager {
   bots: Bot[] = [];
+  browserPromise: Promise<puppeteer.Browser>;
+
+  constructor() {
+    this.browserPromise = puppeteer.launch();
+  }
 
   register(bot: Bot) {
     this.bots.push(bot);
+  }
+
+  async processJob(
+    bot: Bot,
+    draft: JobDraft,
+    logger: BotLogger
+  ): Promise<void> {
+    const browser = await this.browserPromise;
+    const page = await browser.newPage();
+    try {
+      await logger.logInfo("Start processJob");
+      await page.goto(draft.link);
+      const shouldProceed = await bot.shouldCapture(page);
+      if (!shouldProceed) {
+        return;
+      }
+
+      const title = await bot.getTitle(page);
+      const description = await bot.getDescription(page);
+      const tags = await bot.getTags(page);
+      const locationDetails = await bot.getLocationDetails(page);
+      const salaryDetails = await bot.getSalaryDetails(page);
+
+      const job: Job = {
+        title,
+        description,
+        tags,
+        locationDetails,
+        salaryDetails
+      };
+
+      await bot.saveJob(job, logger);
+    } catch (error) {
+      await logger.logError(error, draft);
+    } finally {
+      await page.close();
+      await logger.logInfo("End processJob");
+    }
   }
 
   async run(): Promise<void> {
@@ -96,14 +146,7 @@ export class BotManager {
       await logger.logInfo("End getJobDrafts");
       await logger.logInfo(`Jobs found: ${drafts.length}`);
       for (let draft of drafts) {
-        await logger.logInfo("Start getJob");
-        const job = await bot.getJob(draft, logger);
-        await logger.logInfo("End getJob");
-        if (job) {
-          await logger.logInfo("Start saveJob");
-          await bot.saveJob(job, logger);
-          await logger.logInfo("End saveJob");
-        }
+        await this.processJob(bot, draft, logger);
       }
     }
   }
