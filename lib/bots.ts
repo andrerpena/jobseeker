@@ -6,11 +6,11 @@ export interface Job {
   title: String;
   tags: string[];
   description: string;
-  locationDetails?: RemoteDetails;
+  locationDetails?: LocationDetails;
   salaryDetails?: SalaryDetails;
 }
 
-export interface RemoteDetails {
+export interface LocationDetails {
   raw: string;
   requiredLocation?: string;
   preferredLocation?: string;
@@ -47,7 +47,9 @@ export interface Bot {
 
   getDescription(page: puppeteer.Page): Promise<string>;
 
-  getLocationDetails(page: puppeteer.Page): Promise<RemoteDetails | undefined>;
+  getLocationDetails(
+    page: puppeteer.Page
+  ): Promise<LocationDetails | undefined>;
 
   getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails | undefined>;
 }

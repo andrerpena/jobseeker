@@ -1,4 +1,10 @@
-import { Bot, Job, JobDraft, RemoteDetails, SalaryDetails } from "../lib/bots";
+import {
+  Bot,
+  Job,
+  JobDraft,
+  LocationDetails,
+  SalaryDetails
+} from "../lib/bots";
 import Parser from "rss-parser";
 import { BotLogger } from "../lib/logger";
 import * as puppeteer from "puppeteer";
@@ -13,8 +19,8 @@ import { getMarkdownFromHtml } from "../lib/markdown";
 let parser = new Parser();
 
 export class Stackoverflow implements Bot {
-  extractLocationDetails(remoteDetails: string): RemoteDetails {
-    const result: RemoteDetails = {
+  extractLocationDetails(remoteDetails: string): LocationDetails {
+    const result: LocationDetails = {
       raw: remoteDetails
     };
     if (!remoteDetails) {
@@ -122,7 +128,7 @@ export class Stackoverflow implements Bot {
 
   async getLocationDetails(
     page: puppeteer.Page
-  ): Promise<RemoteDetails | undefined> {
+  ): Promise<LocationDetails | undefined> {
     const overview = await page.$("#overview-items");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
