@@ -45,3 +45,25 @@ export enum CacheControlScope {
 
 /** The `Upload` scalar type represents a file upload promise that resolves an object containing `stream`, `filename`, `mimetype` and `encoding`. */
 export type Upload = any;
+
+// ====================================================
+// Documents
+// ====================================================
+
+export namespace InsertJob {
+  export type Variables = {
+    companyName: string;
+  };
+
+  export type Mutation = {
+    __typename?: "Mutation";
+
+    addCompany: Maybe<AddCompany>;
+  };
+
+  export type AddCompany = {
+    __typename?: "Company";
+
+    id: string;
+  };
+}

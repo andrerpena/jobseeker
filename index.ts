@@ -1,9 +1,9 @@
 import { BotManager } from "./lib/bots";
 import { Stackoverflow } from "./bots/stackoverflow";
 
-const botManagee = new BotManager();
-botManagee.register(new Stackoverflow());
-botManagee.run();
+const botManager = new BotManager();
+botManager.register(new Stackoverflow());
+botManager.run();
 
 // puppeteer.launch({ headless: true }).then(async (browser) => {
 //   const page = await browser.newPage();
