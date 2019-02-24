@@ -1,5 +1,6 @@
 import { Stackoverflow } from "../bots/stackoverflow";
 import puppeteer from "puppeteer";
+import { ConsoleBotLogger } from "../lib/bot-manager";
 
 const JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS =
   "https://stackoverflow.com/jobs/161106/backend-and-devops-kubernetes-docker-terraform-finetune-learning?so=i&pg=1&offset=-1&r=true";
@@ -19,6 +20,22 @@ describe("Stackoverflow", () => {
   });
   afterAll(async () => {
     return browser.close();
+  });
+  describe("drafts", () => {
+    it("should work", async () => {
+      const jobs = await stackoverflow.getJobDrafts(
+        new ConsoleBotLogger("stackoverflow"),
+        browser
+      );
+      expect(jobs).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            link: expect.any(String),
+            draft: null
+          })
+        ])
+      );
+    });
   });
   describe("shouldCapture", () => {
     it("should work when remote", async () => {
@@ -42,7 +59,6 @@ describe("Stackoverflow", () => {
       expect(title).toEqual("Backend Engineer - Routing & Navigation");
     });
   });
-
   describe("getTags", () => {
     it("should work", async () => {
       const page = await browser.newPage();
@@ -57,7 +73,6 @@ describe("Stackoverflow", () => {
       ]);
     });
   });
-
   describe("getDescriptionHtml", () => {
     it("should work", async () => {
       const page = await browser.newPage();

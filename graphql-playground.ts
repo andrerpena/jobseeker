@@ -1,9 +1,13 @@
-import { addCompany, getCompany } from "./lib/graphql-client";
+import { addCompany, addJob, getCompany } from "./lib/graphql-client";
 
-addCompany({
-  input: {
-    urlReference: "aa",
-    displayName: "aaa"
+addJob({
+  job: {
+    title: "aaa",
+    publishedAt: new Date().toISOString(),
+    urlReference: "aaaa",
+    description: "awesome",
+    companyId: "zookt-aaa",
+    tags: ["asp.net"]
   }
 })
   .catch(ex => {

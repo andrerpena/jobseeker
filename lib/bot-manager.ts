@@ -5,6 +5,8 @@ import { JobInput } from "../graphql-types";
 import { addCompany, addJob, getCompany } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
 
+const RATE_LIMIT = 10;
+
 export interface LocationDetails {
   raw?: string;
   requiredLocation?: string;
@@ -35,7 +37,10 @@ export interface JobDraft {
 export interface Bot {
   getName(): string;
 
-  getJobDrafts(logger: Logger): Promise<Array<JobDraft | null>>;
+  getJobDrafts(
+    logger: Logger,
+    browser: puppeteer.Browser
+  ): Promise<Array<JobDraft | null>>;
 
   shouldCapture(page: puppeteer.Page): Promise<boolean>;
 
@@ -99,11 +104,7 @@ export class BotManager {
     this.bots.push(bot);
   }
 
-  async processJob(
-    bot: Bot,
-    draft: JobDraft,
-    logger: BotLogger
-  ): Promise<void> {
+  async processJob(bot: Bot, draft: JobDraft, logger: BotLogger): Promise<any> {
     const browser = await this.browserPromise;
     const page = await browser.newPage();
     logger.logInfo(`Processing: ${draft.link}`);
@@ -112,6 +113,7 @@ export class BotManager {
       await page.goto(draft.link);
       const shouldProceed = await bot.shouldCapture(page);
       if (!shouldProceed) {
+        await logger.logInfo(`Ignoring job: ${draft.link}`);
         return;
       }
 
@@ -125,28 +127,32 @@ export class BotManager {
       const salaryDetails = await bot.getSalaryDetails(page);
       const companyDetails = await bot.getCompany(page);
 
-      const company = await getCompany({
+      const getCompanyResult = await getCompany({
         id: undefined,
         urlReference: companyDetails.urlReference
       });
       let companyId: string;
-      if (company.data) {
-        companyId = company.data.id;
+      if (getCompanyResult.data.company) {
+        companyId = getCompanyResult.data.company.id;
       } else {
-        const insertedCompany = await addCompany({
+        const addCompanyResult = await addCompany({
           input: {
             displayName: companyDetails.displayName,
             urlReference: companyDetails.urlReference
           }
         });
-        if (!insertedCompany.data) {
+        if (!addCompanyResult.data) {
           await logger.logError(
             `could not add company`,
-            insertedCompany.errors
+            addCompanyResult.errors
           );
           return;
         }
-        companyId = insertedCompany.data.id;
+        companyId = addCompanyResult.data.addCompany.id;
+      }
+
+      if (!companyId) {
+        throw Error("COMPANY SHOULD NOT BE NULL");
       }
 
       const job: JobInput = {
@@ -178,6 +184,9 @@ export class BotManager {
 
       if (result.errors) {
         logger.logError(`Could not save job: ${draft.link}`, result.errors);
+      } else {
+        logger.logInfo(`Successfully saved job`, result.data);
+        process.exit(0);
       }
     } catch (error) {
       await logger.logError(error, draft);
@@ -188,17 +197,26 @@ export class BotManager {
   }
 
   async run(): Promise<void> {
+    const browser = await this.browserPromise;
     for (let bot of this.bots) {
       const logger = new ConsoleBotLogger(bot.getName());
       await logger.logInfo("Start getJobDrafts");
-      let drafts = (await bot.getJobDrafts(logger)).filter(
+      let drafts = (await bot.getJobDrafts(logger, browser)).filter(
         i => i !== null
       ) as JobDraft[];
-      drafts = drafts.slice(0, 10);
       await logger.logInfo("End getJobDrafts");
       await logger.logInfo(`Jobs found: ${drafts.length}`);
+      let counter = 0;
       for (let draft of drafts) {
-        await this.processJob(bot, draft, logger);
+        if (counter < RATE_LIMIT) {
+          const data = await this.processJob(bot, draft, logger);
+          if (data) {
+            counter++;
+            logger.logInfo(`Processed ${counter} jobs`);
+          }
+        } else {
+          break;
+        }
       }
     }
   }

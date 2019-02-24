@@ -30,21 +30,21 @@ const client = new ApolloClient({
 });
 
 export function addCompany(variables: AddCompany.Variables) {
-  return client.mutate<AddCompany.AddCompany, AddCompany.Variables>({
+  return client.mutate<AddCompany.Mutation, AddCompany.Variables>({
     mutation: addCompanyMutation,
     variables
   });
 }
 
 export function getCompany(variables: GetCompany.Variables) {
-  return client.query<GetCompany.Company, GetCompany.Variables>({
+  return client.query<GetCompany.Query, GetCompany.Variables>({
     query: getCompanyQuery,
     variables
   });
 }
 
 export function addJob(variables: AddJob.Variables) {
-  return client.mutate<AddJob.AddJob, AddJob.Variables>({
+  return client.mutate<AddJob.Mutation, AddJob.Variables>({
     mutation: addJobMutation,
     variables
   });

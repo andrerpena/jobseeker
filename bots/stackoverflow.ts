@@ -15,6 +15,7 @@ import {
   getNextElement,
   getTextFromElement
 } from "../lib/puppeteer";
+import { fullTextObject } from "../lib/text";
 
 let parser = new Parser();
 
@@ -72,10 +73,6 @@ export class Stackoverflow implements Bot {
       equity: match1.length > 4 ? !!match1[4] : false
     };
   }
-
-  // refineRemoteDetails(locationDetails: RemoteDetails, jobDescription: string): RemoteDetails {
-  //
-  // }
 
   async shouldCapture(page: puppeteer.Page): Promise<boolean> {
     const jobDetailsHeader = await page.$(".job-details--header");
@@ -177,24 +174,23 @@ export class Stackoverflow implements Bot {
     return this.extractSalaryDetails(salaryText);
   }
 
-  async getJobDrafts(logger: BotLogger): Promise<Array<JobDraft | null>> {
-    let feed = await parser.parseURL("https://stackoverflow.com/jobs/feed");
-    if (!feed.items) {
-      await logger.logError("Feed did not have any items");
-      return [];
-    }
-    return Promise.all(
-      feed.items.map(async i => {
-        if (!i.link) {
-          await logger.logError("stackoverflow", i);
-          return null;
-        }
-        return {
-          link: i.link,
-          draft: i
-        };
-      })
-    );
+  async getJobDrafts(
+    logger: BotLogger,
+    browser: puppeteer.Browser
+  ): Promise<Array<JobDraft | null>> {
+    const page = await browser.newPage();
+    await page.goto("https://stackoverflow.com/jobs/remote-developer-jobs");
+    const jobElements = await page.$$("div[data-jobid]");
+    const jobPromises = jobElements.map(async j => {
+      const linkElement = await j.$("h2>a");
+      return getAttributeFromElement(page, linkElement, "href");
+    });
+    return (await Promise.all(jobPromises)).map((p: string) => {
+      return {
+        link: this.buildAbsoluteUrl(p),
+        draft: null
+      };
+    });
   }
 
   getName(): string {
