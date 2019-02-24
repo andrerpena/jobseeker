@@ -1,0 +1,5 @@
+mutation addJob($job: JobInput!) {
+  addJob(input: $job) {
+    id
+  }
+}

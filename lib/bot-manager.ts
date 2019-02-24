@@ -1,14 +1,9 @@
 import { BotLogger, Logger } from "./logger";
 import colors from "colors";
 import * as puppeteer from "puppeteer";
-
-export interface Job {
-  title: String;
-  tags: string[];
-  description: string;
-  locationDetails?: LocationDetails;
-  salaryDetails?: SalaryDetails;
-}
+import { JobInput } from "../graphql-types";
+import { addCompany, addJob, getCompany } from "./graphql-client";
+import { getMarkdownFromHtml } from "./markdown";
 
 export interface LocationDetails {
   raw: string;
@@ -27,6 +22,11 @@ export interface SalaryDetails {
   equity?: boolean;
 }
 
+export interface CompanyDetails {
+  displayName: string;
+  urlReference: string;
+}
+
 export interface JobDraft {
   link: string;
   draft: object;
@@ -37,21 +37,21 @@ export interface Bot {
 
   getJobDrafts(logger: Logger): Promise<Array<JobDraft | null>>;
 
-  saveJob(job: Job, logger: Logger): Promise<void>;
-
   shouldCapture(page: puppeteer.Page): Promise<boolean>;
 
   getTitle(page: puppeteer.Page): Promise<string>;
 
   getTags(page: puppeteer.Page): Promise<string[]>;
 
-  getDescription(page: puppeteer.Page): Promise<string>;
+  getDescriptionHtml(page: puppeteer.Page): Promise<string>;
 
-  getLocationDetails(
-    page: puppeteer.Page
-  ): Promise<LocationDetails | undefined>;
+  getUtcPublishedAt(page: puppeteer.Page): Promise<Date | null>;
 
-  getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails | undefined>;
+  getLocationDetails(page: puppeteer.Page): Promise<LocationDetails>;
+
+  getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails>;
+
+  getCompany(page: puppeteer.Page): Promise<CompanyDetails>;
 }
 
 export class ConsoleBotLogger implements BotLogger {
@@ -115,20 +115,65 @@ export class BotManager {
       }
 
       const title = await bot.getTitle(page);
-      const description = await bot.getDescription(page);
+      const publishedAt = await bot.getUtcPublishedAt(page);
+      const description = getMarkdownFromHtml(
+        await bot.getDescriptionHtml(page)
+      );
       const tags = await bot.getTags(page);
       const locationDetails = await bot.getLocationDetails(page);
       const salaryDetails = await bot.getSalaryDetails(page);
+      const companyDetails = await bot.getCompany(page);
 
-      const job: Job = {
+      const company = await getCompany({
+        id: undefined,
+        urlReference: companyDetails.urlReference
+      });
+      let companyId: string;
+      if (company.data) {
+        companyId = company.data.id;
+      } else {
+        const insertedCompany = await addCompany({
+          input: {
+            displayName: companyDetails.displayName,
+            urlReference: companyDetails.urlReference
+          }
+        });
+        if (!insertedCompany.data) {
+          await logger.logError(
+            `could not add company`,
+            insertedCompany.errors
+          );
+          return;
+        }
+        companyId = insertedCompany.data.id;
+      }
+
+      const job: JobInput = {
         title,
         description,
         tags,
-        locationDetails,
-        salaryDetails
+        companyId,
+        publishedAt: publishedAt
+          ? publishedAt.toISOString()
+          : new Date().toISOString(),
+        urlReference: draft.link,
+        locationRequired: locationDetails.requiredLocation,
+        locationPreferred: locationDetails.preferredLocation,
+        locationPreferredTimezone: locationDetails.preferredTimeZone,
+        locationPreferredTimezoneTolerance:
+          locationDetails.preferredTimeZoneTolerance,
+        locationRaw: locationDetails.raw,
+        salaryRaw: salaryDetails.raw,
+        salaryExact: salaryDetails.exact,
+        salaryMin: salaryDetails.min,
+        salaryMax: salaryDetails.max,
+        salaryCurrency: salaryDetails.currency,
+        salaryEquity: salaryDetails.equity
       };
 
-      await bot.saveJob(job, logger);
+      await addJob({
+        job
+      });
     } catch (error) {
       await logger.logError(error, draft);
     } finally {

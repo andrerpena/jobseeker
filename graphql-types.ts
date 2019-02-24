@@ -32,10 +32,14 @@ export interface JobInput {
   salaryCurrency?: Maybe<string>;
 
   salaryEquity?: Maybe<boolean>;
+
+  urlReference: string;
 }
 
 export interface CompanyInput {
   displayName: string;
+
+  urlReference: string;
 }
 
 export enum CacheControlScope {
@@ -50,9 +54,9 @@ export type Upload = any;
 // Documents
 // ====================================================
 
-export namespace InsertJob {
+export namespace AddCompany {
   export type Variables = {
-    companyName: string;
+    input: CompanyInput;
   };
 
   export type Mutation = {
@@ -62,6 +66,43 @@ export namespace InsertJob {
   };
 
   export type AddCompany = {
+    __typename?: "Company";
+
+    id: string;
+  };
+}
+
+export namespace AddJob {
+  export type Variables = {
+    job: JobInput;
+  };
+
+  export type Mutation = {
+    __typename?: "Mutation";
+
+    addJob: Maybe<AddJob>;
+  };
+
+  export type AddJob = {
+    __typename?: "Job";
+
+    id: string;
+  };
+}
+
+export namespace GetCompany {
+  export type Variables = {
+    id?: Maybe<string>;
+    urlReference?: Maybe<string>;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    company: Maybe<Company>;
+  };
+
+  export type Company = {
     __typename?: "Company";
 
     id: string;

@@ -1,5 +1,0 @@
-mutation insertJob($companyName: String!) {
-  addCompany(input: { displayName: $companyName }) {
-    id
-  }
-}

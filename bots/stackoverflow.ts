@@ -1,10 +1,9 @@
 import {
   Bot,
-  Job,
   JobDraft,
   LocationDetails,
   SalaryDetails
-} from "../lib/bots";
+} from "../lib/bot-manager";
 import Parser from "rss-parser";
 import { BotLogger } from "../lib/logger";
 import * as puppeteer from "puppeteer";
@@ -14,7 +13,6 @@ import {
   getNextElement,
   getTextFromElement
 } from "../lib/puppeteer";
-import { getMarkdownFromHtml } from "../lib/markdown";
 
 let parser = new Parser();
 
@@ -103,7 +101,7 @@ export class Stackoverflow implements Bot {
     return Promise.all(tags.map(t => getTextFromElement(page, t)));
   }
 
-  async getDescription(page: puppeteer.Page): Promise<string> {
+  async getDescriptionHtml(page: puppeteer.Page): Promise<string> {
     const details = await page.$(".job-details--content");
     if (!details) {
       throw new Error("details was not supposed to be null");
@@ -123,12 +121,13 @@ export class Stackoverflow implements Bot {
     if (!html) {
       throw new Error("html was not supposed to be null");
     }
-    return getMarkdownFromHtml(html);
+    return html;
   }
 
-  async getLocationDetails(
-    page: puppeteer.Page
-  ): Promise<LocationDetails | undefined> {
+  async getLocationDetails(page: puppeteer.Page): Promise<LocationDetails> {
+    const result: LocationDetails = {
+      raw: ""
+    };
     const overview = await page.$("#overview-items");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
@@ -138,7 +137,7 @@ export class Stackoverflow implements Bot {
       "Remote details"
     );
     if (!remoteDetailsTitle) {
-      return undefined;
+      return result;
     }
 
     const remoteDetails = await getNextElement(page, remoteDetailsTitle);
@@ -157,19 +156,20 @@ export class Stackoverflow implements Bot {
       const timeZoneText = await getTextFromElement(page, timeZone);
       return this.extractLocationDetails(timeZoneText);
     }
-    return undefined;
+    return result;
   }
 
-  async getSalaryDetails(
-    page: puppeteer.Page
-  ): Promise<SalaryDetails | undefined> {
+  async getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails> {
+    const result: SalaryDetails = {
+      raw: ""
+    };
     const overview = await page.$(".job-details--header ");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
     }
     const salary = await overview.$(".-salary");
     if (!salary) {
-      return undefined;
+      return result;
     }
     const salaryText = await getTextFromElement(page, salary);
     return this.extractSalaryDetails(salaryText);
@@ -193,10 +193,6 @@ export class Stackoverflow implements Bot {
         };
       })
     );
-  }
-
-  async saveJob(job: Job): Promise<void> {
-    return Promise.resolve();
   }
 
   getName(): string {

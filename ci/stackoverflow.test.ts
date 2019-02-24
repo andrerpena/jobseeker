@@ -58,11 +58,11 @@ describe("Stackoverflow", () => {
     });
   });
 
-  describe("getDescription", () => {
+  describe("getDescriptionHtml", () => {
     it("should work", async () => {
       const page = await browser.newPage();
       await page.goto(JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY);
-      const description = await stackoverflow.getDescription(page);
+      const description = await stackoverflow.getDescriptionHtml(page);
       expect(description).toMatchSnapshot();
     });
   });

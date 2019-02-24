@@ -1,4 +1,4 @@
-import { BotManager } from "./lib/bots";
+import { BotManager } from "./lib/bot-manager";
 import { Stackoverflow } from "./bots/stackoverflow";
 
 const botManager = new BotManager();

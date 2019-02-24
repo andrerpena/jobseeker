@@ -6,7 +6,7 @@
   "scripts": {
     "start": "ts-node index.ts",
     "exp": "ts-node exp.ts",
-    "test:gql": "ts-node graphql-client.ts",
+    "test:gql": "ts-node graphql-playground.ts",
     "generate": "gql-gen --config codegen.yml"
   },
   "repository": {
