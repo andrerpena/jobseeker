@@ -82,7 +82,7 @@ describe("Stackoverflow", () => {
       const page = await browser.newPage();
       await page.goto(JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS);
       const remoteDetails = await stackoverflow.getLocationDetails(page);
-      expect(remoteDetails).toEqual(null);
+      expect(remoteDetails).toEqual({});
     });
   });
   describe("getSalaryDetails", () => {
@@ -103,7 +103,18 @@ describe("Stackoverflow", () => {
       const page = await browser.newPage();
       await page.goto(JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY);
       const salaryDetails = await stackoverflow.getSalaryDetails(page);
-      expect(salaryDetails).toEqual(null);
+      expect(salaryDetails).toEqual({});
+    });
+  });
+  describe("getCompany", async () => {
+    it("should work", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_REMOTE_URL_WITH_SALARY);
+      const company = await stackoverflow.getCompany(page);
+      expect(company).toEqual({
+        displayName: "Bitfinex",
+        urlReference: "https://stackoverflow.com/jobs/companies/bitfinex"
+      });
     });
   });
 });

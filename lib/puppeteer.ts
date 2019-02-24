@@ -8,6 +8,18 @@ export async function getTextFromElement(page: Page, element: ElementHandle) {
   return page.evaluate(element => element.textContent, element);
 }
 
+export async function getAttributeFromElement(
+  page: Page,
+  element: ElementHandle,
+  attribute: string
+) {
+  return page.evaluate(
+    (element, attribute) => element.getAttribute(attribute),
+    element,
+    attribute
+  );
+}
+
 export async function getInnerHtmlFromElement(
   page: Page,
   element: ElementHandle

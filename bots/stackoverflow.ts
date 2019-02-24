@@ -1,5 +1,6 @@
 import {
   Bot,
+  CompanyDetails,
   JobDraft,
   LocationDetails,
   SalaryDetails
@@ -8,6 +9,7 @@ import Parser from "rss-parser";
 import { BotLogger } from "../lib/logger";
 import * as puppeteer from "puppeteer";
 import {
+  getAttributeFromElement,
   getElementWithExactText,
   getInnerHtmlFromElement,
   getNextElement,
@@ -17,6 +19,10 @@ import {
 let parser = new Parser();
 
 export class Stackoverflow implements Bot {
+  buildAbsoluteUrl(relativeUrl: string) {
+    return `https://stackoverflow.com${relativeUrl}`;
+  }
+
   extractLocationDetails(remoteDetails: string): LocationDetails {
     const result: LocationDetails = {
       raw: remoteDetails
@@ -125,9 +131,7 @@ export class Stackoverflow implements Bot {
   }
 
   async getLocationDetails(page: puppeteer.Page): Promise<LocationDetails> {
-    const result: LocationDetails = {
-      raw: ""
-    };
+    const result: LocationDetails = {};
     const overview = await page.$("#overview-items");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
@@ -160,9 +164,7 @@ export class Stackoverflow implements Bot {
   }
 
   async getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails> {
-    const result: SalaryDetails = {
-      raw: ""
-    };
+    const result: SalaryDetails = {};
     const overview = await page.$(".job-details--header ");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
@@ -197,5 +199,36 @@ export class Stackoverflow implements Bot {
 
   getName(): string {
     return "Stackoverflow";
+  }
+
+  async getCompany(page: puppeteer.Page): Promise<CompanyDetails> {
+    const overview = await page.$(".job-details--header");
+    if (!overview) {
+      throw new Error("overview was not supposed to be null");
+    }
+    const link = await overview.$("a.fc-black-700");
+    if (!link) {
+      throw new Error("link was not supposed to be null");
+    }
+    const companyName = await getTextFromElement(page, link);
+
+    if (!companyName) {
+      throw new Error("companyName was not supposed to be null");
+    }
+
+    const companyLink = await getAttributeFromElement(page, link, "href");
+
+    if (!companyLink) {
+      throw new Error("companyLink was not supposed to be null");
+    }
+
+    return {
+      urlReference: this.buildAbsoluteUrl(companyLink),
+      displayName: companyName
+    };
+  }
+
+  async getUtcPublishedAt(page: puppeteer.Page): Promise<Date | null> {
+    return null;
   }
 }

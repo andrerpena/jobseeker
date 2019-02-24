@@ -3,7 +3,10 @@ import { Stackoverflow } from "./bots/stackoverflow";
 
 const botManager = new BotManager();
 botManager.register(new Stackoverflow());
-botManager.run();
+botManager
+  .run()
+  .catch(ex => console.log(ex))
+  .then(() => console.log("awesome"));
 
 // puppeteer.launch({ headless: true }).then(async (browser) => {
 //   const page = await browser.newPage();

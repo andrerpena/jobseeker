@@ -36,7 +36,7 @@ describe("Stackoverflow", () => {
     });
     it("when the input is not valid", () => {
       const remoteDetails = stackoverflow.extractLocationDetails("(GMT+00:00");
-      expect(remoteDetails).toEqual(null);
+      expect(remoteDetails).toEqual({ raw: "(GMT+00:00" });
     });
   });
   describe("extractSalaryDetails", () => {
@@ -89,4 +89,5 @@ Equity                            `);
       });
     });
   });
+  describe("getCompanyDetails", () => {});
 });

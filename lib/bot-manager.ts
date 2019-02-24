@@ -1,12 +1,12 @@
 import { BotLogger, Logger } from "./logger";
 import colors from "colors";
-import * as puppeteer from "puppeteer";
+import puppeteer from "puppeteer";
 import { JobInput } from "../graphql-types";
 import { addCompany, addJob, getCompany } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
 
 export interface LocationDetails {
-  raw: string;
+  raw?: string;
   requiredLocation?: string;
   preferredLocation?: string;
   preferredTimeZone?: number;
@@ -14,7 +14,7 @@ export interface LocationDetails {
 }
 
 export interface SalaryDetails {
-  raw: string;
+  raw?: string;
   exact?: number;
   min?: number;
   max?: number;
@@ -106,6 +106,7 @@ export class BotManager {
   ): Promise<void> {
     const browser = await this.browserPromise;
     const page = await browser.newPage();
+    logger.logInfo(`Processing: ${draft.link}`);
     try {
       await logger.logInfo("Start processJob");
       await page.goto(draft.link);
@@ -171,9 +172,13 @@ export class BotManager {
         salaryEquity: salaryDetails.equity
       };
 
-      await addJob({
+      const result = await addJob({
         job
       });
+
+      if (result.errors) {
+        logger.logError(`Could not save job: ${draft.link}`, result.errors);
+      }
     } catch (error) {
       await logger.logError(error, draft);
     } finally {
