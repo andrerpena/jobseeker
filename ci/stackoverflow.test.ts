@@ -31,7 +31,9 @@ describe("Stackoverflow", () => {
         expect.arrayContaining([
           expect.objectContaining({
             link: expect.any(String),
-            draft: null
+            draft: expect.objectContaining({
+              date: expect.any(Date)
+            })
           })
         ])
       );

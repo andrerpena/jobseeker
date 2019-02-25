@@ -5,7 +5,6 @@ import {
   LocationDetails,
   SalaryDetails
 } from "../lib/bot-manager";
-import Parser from "rss-parser";
 import { BotLogger } from "../lib/logger";
 import * as puppeteer from "puppeteer";
 import {
@@ -15,8 +14,7 @@ import {
   getNextElement,
   getTextFromElement
 } from "../lib/puppeteer";
-
-let parser = new Parser();
+import { getTimeAgoFromString, getTimeFromTimeAgo } from "../lib/date";
 
 export class Stackoverflow implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
@@ -182,14 +180,29 @@ export class Stackoverflow implements Bot {
     const jobElements = await page.$$("div[data-jobid]");
     const jobPromises = jobElements.map(async j => {
       const linkElement = await j.$("h2>a");
-      return getAttributeFromElement(page, linkElement, "href");
-    });
-    return (await Promise.all(jobPromises)).map((p: string) => {
+      if (!linkElement) {
+        throw new Error("linkElement was not supposed to be null");
+      }
+      const dateElement = await j.$("span.ps-absolute:last-child");
+      if (!dateElement) {
+        throw new Error("dateElement was not supposed to be null");
+      }
+      const url = await getAttributeFromElement(page, linkElement, "href");
+      if (!url) {
+        throw new Error("url was not supposed to be null");
+      }
+      const timeString = await getTextFromElement(page, dateElement);
+      if (!timeString) {
+        throw new Error("timeString was not supposed to be null");
+      }
       return {
-        link: this.buildAbsoluteUrl(p),
-        draft: null
+        link: this.buildAbsoluteUrl(url),
+        draft: {
+          date: getTimeFromTimeAgo(getTimeAgoFromString(timeString), new Date())
+        }
       };
     });
+    return Promise.all(jobPromises);
   }
 
   getName(): string {

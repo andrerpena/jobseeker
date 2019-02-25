@@ -5,12 +5,19 @@ export interface TimeAgo {
 }
 
 export function getTimeAgoFromString(text: string): TimeAgo | null {
-  const matches = text.match(/(?:([^\d]*)(\d+)(\w))\sago/);
+  const finalText = text ? text.toLowerCase() : "";
+  const matches = finalText.match(/(?:([^\d]*)(\d+)(\w))\sago/);
   if (matches) {
     return {
       prefix: matches[1],
       number: parseInt(matches[2]),
       timeFrame: matches[3].toLowerCase()
+    };
+  } else if (finalText === "yesterday") {
+    return {
+      number: 1,
+      timeFrame: "d",
+      prefix: ""
     };
   }
   return null;
@@ -18,7 +25,7 @@ export function getTimeAgoFromString(text: string): TimeAgo | null {
 
 export function getTimeFromTimeAgo(timeAgo: TimeAgo, now: Date): Date {
   const copiedNow = new Date(now.getTime());
-  if (timeAgo.prefix) {
+  if (!timeAgo || timeAgo.prefix) {
     return copiedNow;
   } else {
     if (timeAgo.timeFrame === "h") {
