@@ -5,9 +5,11 @@
   "main": "index.js",
   "scripts": {
     "start": "ts-node index.ts",
+    "dev": "ts-node index.ts",
     "exp": "ts-node exp.ts",
     "playground": "ts-node graphql-playground.ts",
-    "generate": "gql-gen --config codegen.yml"
+    "generate": "gql-gen --config codegen.yml",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",

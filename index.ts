@@ -6,7 +6,10 @@ botManager.register(new Stackoverflow());
 botManager
   .run()
   .catch(ex => console.log(ex))
-  .then(() => console.log("awesome"));
+  .then(() => {
+    console.log("awesome");
+    process.exit(0);
+  });
 
 // puppeteer.launch({ headless: true }).then(async (browser) => {
 //   const page = await browser.newPage();

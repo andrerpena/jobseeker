@@ -186,7 +186,6 @@ export class BotManager {
         logger.logError(`Could not save job: ${draft.link}`, result.errors);
       } else {
         logger.logInfo(`Successfully saved job`, result.data);
-        process.exit(0);
       }
     } catch (error) {
       await logger.logError(error, draft);
