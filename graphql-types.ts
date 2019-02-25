@@ -33,7 +33,7 @@ export interface JobInput {
 
   salaryEquity?: Maybe<boolean>;
 
-  urlReference: string;
+  url: string;
 }
 
 export interface CompanyInput {

@@ -163,7 +163,7 @@ export class BotManager {
         publishedAt: publishedAt
           ? publishedAt.toISOString()
           : new Date().toISOString(),
-        urlReference: draft.link,
+        url: draft.link,
         locationRequired: locationDetails.requiredLocation,
         locationPreferred: locationDetails.preferredLocation,
         locationPreferredTimezone: locationDetails.preferredTimeZone,

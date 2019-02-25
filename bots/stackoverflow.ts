@@ -15,7 +15,6 @@ import {
   getNextElement,
   getTextFromElement
 } from "../lib/puppeteer";
-import { fullTextObject } from "../lib/text";
 
 let parser = new Parser();
 
@@ -179,7 +178,7 @@ export class Stackoverflow implements Bot {
     browser: puppeteer.Browser
   ): Promise<Array<JobDraft | null>> {
     const page = await browser.newPage();
-    await page.goto("https://stackoverflow.com/jobs/remote-developer-jobs");
+    await page.goto("https://stackoverflow.com/jobs?r=true&sort=p");
     const jobElements = await page.$$("div[data-jobid]");
     const jobPromises = jobElements.map(async j => {
       const linkElement = await j.$("h2>a");

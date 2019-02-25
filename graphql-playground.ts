@@ -4,7 +4,7 @@ addJob({
   job: {
     title: "aaa",
     publishedAt: new Date().toISOString(),
-    urlReference: "aaaa",
+    url: "aaaa",
     description: "awesome",
     companyId: "zookt-aaa",
     tags: ["asp.net"]
