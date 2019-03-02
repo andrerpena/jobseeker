@@ -206,7 +206,7 @@ export class Stackoverflow implements Bot {
   }
 
   getName(): string {
-    return "Stackoverflow";
+    return "stackoverflow";
   }
 
   async getCompany(page: puppeteer.Page): Promise<CompanyDetails> {

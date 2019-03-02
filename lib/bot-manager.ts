@@ -117,6 +117,7 @@ export class BotManager {
         return;
       }
 
+      const source = bot.getName();
       const title = await bot.getTitle(page);
       const publishedAt = await bot.getUtcPublishedAt(page);
       const description = getMarkdownFromHtml(
@@ -138,7 +139,7 @@ export class BotManager {
         const addCompanyResult = await addCompany({
           input: {
             displayName: companyDetails.displayName,
-            urlReference: companyDetails.urlReference
+            url: companyDetails.urlReference
           }
         });
         if (!addCompanyResult.data) {
@@ -175,17 +176,28 @@ export class BotManager {
         salaryMin: salaryDetails.min,
         salaryMax: salaryDetails.max,
         salaryCurrency: salaryDetails.currency,
-        salaryEquity: salaryDetails.equity
+        salaryEquity: salaryDetails.equity,
+        source
       };
 
-      const result = await addJob({
-        job
-      });
+      try {
+        const result = await addJob({
+          job
+        });
 
-      if (result.errors) {
-        logger.logError(`Could not save job: ${draft.link}`, result.errors);
-      } else {
-        logger.logInfo(`Successfully saved job`, result.data);
+        if (result.errors) {
+          logger.logError(
+            `Could not save job link: ${draft.link}. job object: ${job}`,
+            result.errors
+          );
+        } else {
+          logger.logInfo(`Successfully saved job`, result.data);
+        }
+      } catch (error) {
+        logger.logError(
+          `Could not save job link: ${draft.link}. Error: ${error}`,
+          job
+        );
       }
     } catch (error) {
       await logger.logError(error, draft);

@@ -34,12 +34,22 @@ export interface JobInput {
   salaryEquity?: Maybe<boolean>;
 
   url: string;
+
+  source: string;
 }
 
 export interface CompanyInput {
   displayName: string;
 
-  urlReference: string;
+  url: string;
+}
+
+export interface UpdateSourceInput {
+  name: string;
+
+  updateMessage: string;
+
+  updateMessageDetails?: Maybe<string>;
 }
 
 export enum CacheControlScope {
