@@ -1,0 +1,91 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Stackoverflow getDescription should work 1`] = `
+"**Millions of people experience real-life adventures with our apps. We help people all over the world discover the best hiking and biking routes, empowering our users to explore more of the great outdoors. And we’re good at it: Google and Apple have listed us as one of their Apps of the Year numerous times—and we are consistently ranked amongst the highest-grossing apps in both Google Play and the App Store.**
+
+If you would like to build the future of outdoor exploration, we’re looking for a one of a kind backend engineer to join our team.
+
+****What will you do****
+
+*   Bring the world’s best outdoor routing engine to an even higher level.
+*   Tune our algorithms to deliver the best routes for cyclists, hikers, mountain bikers and other outdoor enthusiasts-
+*   Build reliable import and processing pipelines for OpenStreetMap data, elevation data and more.
+*   Implement all kind of map-related features such as vector maps, directions, and map matching while working closely with our web and mobile developers, designers, copywriters, and product managers.
+*   Build and improve existing micro-services, primarily in Kotlin/Java and Python.
+*   Use the AWS ecosystem to build resilient and high-performing systems.
+
+****Why you will love it****
+
+*   You’ll work on a global product that inspires millions of people around the world
+*   As we know you are a smart and responsible engineer, you’ll get system access on your first day.
+*   You’ll take ownership of your projects from day one (from concept to implementation; testing, deployment, and monitoring).
+*   Your challenging tasks will keep improving your skills and keep you up-to-date with the latest technologies.
+*   We have a wide range of diverse challenges that will let you get the full picture of our GIS technologies.
+*   We believe good ideas count more than hierarchies.
+*   You’ll work together with enthusiastic engineers, hikers, and cyclists.
+*   You’ll travel together with our team to amazing outdoor places several times a year to exchange ideas, learnings and go for hikes and rides.
+*   We let you work from wherever you want, be it a beach, the mountains, our headquarters in Potsdam or situated between the time zones UTC-1 and UTC+3.
+
+****You will be successful in this position if you****
+
+*   Are highly self-driven, responsible and keen to learn and improve.
+*   Know your toolkit: git, ssh, bash, profiling, and docker.
+*   Have 3+ years experience in developing software in the GIS domain.
+*   Possess professional experience in a type-safe language like Java or C++.
+*   Have a passion to optimize and tune solutions with a systematic approach.
+*   You love math and abstract thinking (have you just imagined a graph?).
+*   Live and breathe DevOps and believe in automated testing, infrastructure as code, continuous deployment, monitoring and open communication.
+
+****Sounds like you?****
+
+Then send us the following:
+
+*   Your CV.
+*   A write-up explaining who you are and why you are interested in working at komoot.
+*   Examples of your work (e.g. GitHub, PDFs, Slideshare, etc.).
+*   Feel free to send us something that shows us a little more about what you’re interested in, be it your Twitter/Instagram account, or your OpenStreetMap profile if you have one."
+`;
+
+exports[`Stackoverflow getDescriptionHtml should work 1`] = `
+"<p><strong>Millions of people experience real-life adventures with our apps. We help people all over the world discover the best hiking and biking routes, empowering our users to explore more of the great outdoors. And we’re good at it: Google and Apple have listed us as one of their Apps of the Year numerous times—and we are consistently ranked amongst the highest-grossing apps in both Google Play and the App Store.</strong></p>
+<p><span>If you would like to build the future of outdoor exploration, we’re looking for a one of a kind backend engineer to join our team.</span></p>
+<p><strong><strong>What will you do</strong></strong></p>
+<ul>
+<li><span>Bring the world’s best outdoor routing engine to an even higher level.</span></li>
+<li><span>Tune our algorithms to deliver the best routes for cyclists, hikers, mountain bikers and other outdoor enthusiasts-</span></li>
+<li><span>Build reliable import and processing pipelines for OpenStreetMap data, elevation data and more.</span></li>
+<li><span>Implement all kind of map-related features such as vector maps, directions, and map matching while working closely with our web and mobile developers, designers, copywriters, and product managers.</span></li>
+<li><span>Build and improve existing micro-services, primarily in Kotlin/Java and Python.</span></li>
+<li><span>Use the AWS ecosystem to build resilient and high-performing systems.</span></li>
+</ul>
+<p><strong><strong>Why you will love it</strong></strong></p>
+<ul>
+<li><span>You’ll work on a global product that inspires millions of people around the world</span></li>
+<li><span>As we know you are a smart and responsible engineer, you’ll get system access on your first day.</span></li>
+<li><span>You’ll take ownership of your projects from day one (from concept to implementation; testing, deployment, and monitoring).</span></li>
+<li><span>Your challenging tasks will keep improving your skills and keep you up-to-date with the latest technologies.</span></li>
+<li><span>We have a wide range of diverse challenges that will let you get the full picture of our GIS technologies.</span></li>
+<li><span>We believe good ideas count more than hierarchies.</span></li>
+<li><span>You’ll work together with enthusiastic engineers, hikers, and cyclists.</span></li>
+<li><span>You’ll travel together with our team to amazing outdoor places several times a year to exchange ideas, learnings and go for hikes and rides.</span></li>
+<li><span>We let you work from wherever you want, be it a beach, the mountains, our headquarters in Potsdam or situated between the time zones UTC-1 and UTC+3.</span></li>
+</ul>
+<p><strong><strong>You will be successful in this position if you</strong></strong></p>
+<ul>
+<li><span>Are highly self-driven, responsible and keen to learn and improve.</span></li>
+<li><span>Know your toolkit: git, ssh, bash, profiling, and docker.</span></li>
+<li><span>Have 3+ years experience in developing software in the GIS domain.</span></li>
+<li><span>Possess professional experience in a type-safe language like Java or C++.</span></li>
+<li><span>Have a passion to optimize and tune solutions with a systematic approach.</span></li>
+<li><span>You love math and abstract thinking (have you just imagined a graph?).</span></li>
+<li><span>Live and breathe DevOps and believe in automated testing, infrastructure as code, continuous deployment, monitoring and open communication.</span></li>
+</ul>
+<p><strong><strong>Sounds like you?</strong></strong></p>
+<p><span>Then send us the following:</span></p>
+<ul>
+<li><span>Your CV.</span></li>
+<li><span>A write-up explaining who you are and why you are interested in working at komoot.</span></li>
+<li><span>Examples of your work (e.g. GitHub, PDFs, Slideshare, etc.).</span></li>
+<li><span>Feel free to send us something that shows us a little more about what you’re interested in, be it your Twitter/Instagram account, or your OpenStreetMap profile if you have one.</span></li>
+</ul>"
+`;
