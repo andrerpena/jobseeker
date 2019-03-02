@@ -1,4 +1,5 @@
-import { ElementHandle, FrameBase, Page } from "puppeteer";
+import { ElementHandle, Page } from "puppeteer";
+import puppeteer from "puppeteer";
 
 export interface Queryable {
   $x(expression: string): Promise<ElementHandle[]>;
@@ -43,4 +44,10 @@ export async function getElementWithExactText(
     return elements[0];
   }
   return null;
+}
+
+export async function launchPuppeteer(): Promise<puppeteer.Browser> {
+  return puppeteer.launch({
+    args: ["--no-sandbox", "--disable-setuid-sandbox"]
+  });
 }

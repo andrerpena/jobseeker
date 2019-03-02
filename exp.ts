@@ -2,7 +2,8 @@ import puppeteer, { ElementHandle, Request } from "puppeteer";
 import {
   getElementWithExactText,
   getNextElement,
-  getTextFromElement
+  getTextFromElement,
+  launchPuppeteer
 } from "./lib/puppeteer";
 
 const html = `
@@ -18,7 +19,7 @@ const html = `
 </html>`;
 
 (async () => {
-  const browser = await puppeteer.launch();
+  const browser = await launchPuppeteer();
   const page = await browser.newPage();
   await page.goto(`data:text/html,${html}`);
 

@@ -1,6 +1,7 @@
 import { Stackoverflow } from "../bots/stackoverflow";
 import puppeteer from "puppeteer";
 import { ConsoleBotLogger } from "../lib/bot-manager";
+import { launchPuppeteer } from "../lib/puppeteer";
 
 const JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS =
   "https://stackoverflow.com/jobs/161106/backend-and-devops-kubernetes-docker-terraform-finetune-learning?so=i&pg=1&offset=-1&r=true";
@@ -16,7 +17,7 @@ const stackoverflow = new Stackoverflow();
 describe("Stackoverflow", () => {
   let browser: puppeteer.Browser;
   beforeAll(async () => {
-    browser = await puppeteer.launch();
+    browser = await launchPuppeteer();
   });
   afterAll(async () => {
     return browser.close();

@@ -4,6 +4,7 @@ import puppeteer from "puppeteer";
 import { JobInput } from "../graphql-types";
 import { addCompany, addJob, getCompany } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
+import { launchPuppeteer } from "./puppeteer";
 
 const RATE_LIMIT = 10;
 
@@ -97,7 +98,7 @@ export class BotManager {
   browserPromise: Promise<puppeteer.Browser>;
 
   constructor() {
-    this.browserPromise = puppeteer.launch();
+    this.browserPromise = launchPuppeteer();
   }
 
   register(bot: Bot) {

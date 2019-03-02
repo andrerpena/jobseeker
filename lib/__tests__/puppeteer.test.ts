@@ -3,7 +3,8 @@ import {
   getElementWithExactText,
   getInnerHtmlFromElement,
   getNextElement,
-  getTextFromElement
+  getTextFromElement,
+  launchPuppeteer
 } from "../puppeteer";
 
 const html = `
@@ -22,7 +23,7 @@ const html = `
 describe("puppeteer", () => {
   let browser: puppeteer.Browser;
   beforeAll(async () => {
-    browser = await puppeteer.launch();
+    browser = await launchPuppeteer();
   });
   afterAll(async () => {
     return browser.close();
