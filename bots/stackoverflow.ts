@@ -214,7 +214,7 @@ export class Stackoverflow implements Bot {
     if (!overview) {
       throw new Error("overview was not supposed to be null");
     }
-    const link = await overview.$("a.fc-black-700");
+    const link = await overview.$("a.fc-black-700, a.fc-black-800");
     if (!link) {
       throw new Error("link was not supposed to be null");
     }

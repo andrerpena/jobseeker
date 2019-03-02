@@ -28,8 +28,10 @@ botManager
     new Stackoverflow(),
     {
       link:
-        "https://stackoverflow.com/jobs/235026/watch-the-video-award-winning-music-software-mixed-in-key?a=1gORJIfaBbjy&so=p&pg=1&offset=1&total=202&r=true",
-      draft: { date: "2019-03-02T04:35:08.634Z" }
+        "https://stackoverflow.com/jobs/234531/software-developer-academic-analytics?a=1gEzBrsIBGRG&so=p&pg=1&offset=23&total=349&r=true",
+      draft: {
+        date: "2019-02-28T15:39:30.917Z"
+      }
     },
     new ConsoleBotLogger("stackoverflow")
   )
