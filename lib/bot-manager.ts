@@ -27,7 +27,8 @@ export interface SalaryDetails {
 
 export interface CompanyDetails {
   displayName: string;
-  urlReference: string;
+  url: string;
+  imageUrl: string;
 }
 
 export interface JobDraft {
@@ -131,7 +132,7 @@ export class BotManager {
 
       const getCompanyResult = await getCompany({
         id: undefined,
-        urlReference: companyDetails.urlReference
+        urlReference: companyDetails.url
       });
       let companyId: string;
       if (getCompanyResult.data.company) {
@@ -140,7 +141,8 @@ export class BotManager {
         const addCompanyResult = await addCompany({
           input: {
             displayName: companyDetails.displayName,
-            url: companyDetails.urlReference
+            url: companyDetails.url,
+            imageUrl: companyDetails.imageUrl
           }
         });
         if (!addCompanyResult.data) {
@@ -162,6 +164,7 @@ export class BotManager {
         description,
         tags,
         companyId,
+
         publishedAt: publishedAt
           ? publishedAt.toISOString()
           : new Date().toISOString(),

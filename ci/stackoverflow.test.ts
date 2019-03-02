@@ -131,7 +131,8 @@ describe("Stackoverflow", () => {
       const company = await stackoverflow.getCompany(page);
       expect(company).toEqual({
         displayName: "Bitfinex",
-        urlReference: "https://stackoverflow.com/jobs/companies/bitfinex"
+        imageUrl: "https://i.stack.imgur.com/2iaF1.jpg",
+        url: "https://stackoverflow.com/jobs/companies/bitfinex"
       });
     });
   });

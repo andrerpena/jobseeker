@@ -230,9 +230,21 @@ export class Stackoverflow implements Bot {
       throw new Error("companyLink was not supposed to be null");
     }
 
+    const companyImageLink = await overview.$(".s-avatar img");
+    if (!companyImageLink) {
+      throw new Error("companyImageLink was not supposed to be null");
+    }
+
+    const companyImageUrl = await getAttributeFromElement(
+      page,
+      companyImageLink,
+      "src"
+    );
+
     return {
-      urlReference: this.buildAbsoluteUrl(companyLink),
-      displayName: companyName
+      displayName: companyName,
+      url: this.buildAbsoluteUrl(companyLink),
+      imageUrl: companyImageUrl
     };
   }
 

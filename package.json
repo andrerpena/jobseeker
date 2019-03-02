@@ -7,7 +7,7 @@
     "start": "node ./dist/index.js",
     "dev": "ts-node index.ts",
     "exp": "ts-node exp.ts",
-    "playground": "ts-node graphql-playground.ts",
+    "playground": "ts-node playground.ts",
     "generate": "gql-gen --config codegen.yml",
     "build": "tsc && ts-node ./tools/build.ts",
     "test": "jest --config=jest.unit.config.js"
