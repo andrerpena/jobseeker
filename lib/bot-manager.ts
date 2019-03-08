@@ -33,7 +33,7 @@ export interface CompanyDetails {
 
 export interface JobDraft {
   link: string;
-  draft: object;
+  draft: any;
 }
 
 export interface Bot {
@@ -46,19 +46,28 @@ export interface Bot {
 
   shouldCapture(page: puppeteer.Page): Promise<boolean>;
 
-  getTitle(page: puppeteer.Page): Promise<string>;
+  getTitle(page: puppeteer.Page, draft: JobDraft): Promise<string>;
 
-  getTags(page: puppeteer.Page): Promise<string[]>;
+  getTags(page: puppeteer.Page, draft: JobDraft): Promise<string[]>;
 
-  getDescriptionHtml(page: puppeteer.Page): Promise<string>;
+  getDescriptionHtml(page: puppeteer.Page, draft: JobDraft): Promise<string>;
 
-  getUtcPublishedAt(page: puppeteer.Page): Promise<Date | null>;
+  getUtcPublishedAt(
+    page: puppeteer.Page,
+    draft: JobDraft
+  ): Promise<Date | null>;
 
-  getLocationDetails(page: puppeteer.Page): Promise<LocationDetails>;
+  getLocationDetails(
+    page: puppeteer.Page,
+    draft: JobDraft
+  ): Promise<LocationDetails>;
 
-  getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails>;
+  getSalaryDetails(
+    page: puppeteer.Page,
+    draft: JobDraft
+  ): Promise<SalaryDetails>;
 
-  getCompany(page: puppeteer.Page): Promise<CompanyDetails>;
+  getCompany(page: puppeteer.Page, draft: JobDraft): Promise<CompanyDetails>;
 }
 
 export class ConsoleBotLogger implements BotLogger {
@@ -120,15 +129,15 @@ export class BotManager {
       }
 
       const source = bot.getName();
-      const title = await bot.getTitle(page);
-      const publishedAt = await bot.getUtcPublishedAt(page);
+      const title = await bot.getTitle(page, draft);
+      const publishedAt = await bot.getUtcPublishedAt(page, draft);
       const description = getMarkdownFromHtml(
-        await bot.getDescriptionHtml(page)
+        await bot.getDescriptionHtml(page, draft)
       );
-      const tags = await bot.getTags(page);
-      const locationDetails = await bot.getLocationDetails(page);
-      const salaryDetails = await bot.getSalaryDetails(page);
-      const companyDetails = await bot.getCompany(page);
+      const tags = await bot.getTags(page, draft);
+      const locationDetails = await bot.getLocationDetails(page, draft);
+      const salaryDetails = await bot.getSalaryDetails(page, draft);
+      const companyDetails = await bot.getCompany(page, draft);
 
       const getCompanyResult = await getCompany({
         id: undefined,

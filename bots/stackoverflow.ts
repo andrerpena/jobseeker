@@ -248,7 +248,10 @@ export class Stackoverflow implements Bot {
     };
   }
 
-  async getUtcPublishedAt(page: puppeteer.Page): Promise<Date | null> {
-    return null;
+  async getUtcPublishedAt(
+    page: puppeteer.Page,
+    draft: JobDraft
+  ): Promise<Date | null> {
+    return draft.draft.date;
   }
 }
