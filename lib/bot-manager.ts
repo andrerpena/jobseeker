@@ -115,7 +115,7 @@ export class BotManager {
     this.bots.push(bot);
   }
 
-  async processJob(bot: Bot, draft: JobDraft, logger: BotLogger): Promise<any> {
+  async saveJob(bot: Bot, draft: JobDraft, logger: BotLogger): Promise<any> {
     const browser = await this.browserPromise;
     const page = await browser.newPage();
     logger.logInfo(`Processing: ${draft.link}`);
@@ -233,7 +233,7 @@ export class BotManager {
       let counter = 0;
       for (let draft of drafts) {
         if (counter < RATE_LIMIT) {
-          const data = await this.processJob(bot, draft, logger);
+          const data = await this.saveJob(bot, draft, logger);
           if (data) {
             counter++;
             logger.logInfo(`Processed ${counter} jobs`);

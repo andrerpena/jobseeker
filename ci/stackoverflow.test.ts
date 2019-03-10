@@ -15,6 +15,8 @@ const JOB_NO_REMOTE_URL =
 const stackoverflow = new Stackoverflow();
 
 describe("Stackoverflow", () => {
+  jest.setTimeout(30000);
+
   let browser: puppeteer.Browser;
   beforeAll(async () => {
     browser = await launchPuppeteer();
