@@ -86,7 +86,7 @@ export class WeWorkRemotely implements Bot {
     return new Date(dateString);
   }
 
-  shouldCapture(page: puppeteer.Page): Promise<boolean> {
-    return undefined;
+  async shouldCapture(page: puppeteer.Page): Promise<boolean> {
+    return true;
   }
 }

@@ -6,6 +6,7 @@ module.exports = {
   // An array of file extensions your modules use
   moduleFileExtensions: ["ts", "tsx", "js", "json"],
   testMatch: ["<rootDir>/ci/*.test.ts"],
+
   transform: {
     "^.+\\.(ts|tsx)$": "ts-jest"
   }

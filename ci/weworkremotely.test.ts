@@ -43,6 +43,7 @@ describe("WeWorkRemotely", () => {
     });
   });
   describe("getUtcPublishedAt", async () => {
+    expect(1).toEqual(2);
     it("should work", async () => {
       const page = await browser.newPage();
       await page.goto(JOB_REMOTE_URL_MUST_BE_LOCATED_US);
