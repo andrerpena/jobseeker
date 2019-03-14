@@ -74,7 +74,7 @@ export class WeWorkRemotely implements Bot {
     const jobSections = await page.$$("section.jobs");
     const jobLists = await Promise.all(
       jobSections.map(async jobSection => {
-        const jobElements = await jobSection.$$("ul li a");
+        const jobElements = await jobSection.$$("ul li > a");
         return Promise.all(
           jobElements.map(async jobElement => {
             const href = await getAttributeFromElement(
@@ -83,7 +83,7 @@ export class WeWorkRemotely implements Bot {
               "href"
             );
             return {
-              link: href,
+              link: this.buildAbsoluteUrl(href),
               draft: null
             };
           })
@@ -93,22 +93,22 @@ export class WeWorkRemotely implements Bot {
     return jobLists.reduce((p, c) => p.concat(c), []);
   }
 
-  getLocationDetails(
+  async getLocationDetails(
     page: puppeteer.Page,
     draft: JobDraft
   ): Promise<LocationDetails> {
-    return undefined;
+    return {};
   }
 
   getName(): string {
     return "we-work-remotely";
   }
 
-  getSalaryDetails(
+  async getSalaryDetails(
     page: puppeteer.Page,
     draft: JobDraft
   ): Promise<SalaryDetails> {
-    return undefined;
+    return {};
   }
 
   async getTags(page: puppeteer.Page, draft: JobDraft): Promise<string[]> {
