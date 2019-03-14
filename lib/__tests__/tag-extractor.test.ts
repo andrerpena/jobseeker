@@ -20,6 +20,15 @@ describe("tag-extractor", () => {
         name: "node.js"
       });
     });
+    it("should work when there is a tag with - that should be replaced with string", () => {
+      const text = "twitter bootstrap";
+      const tags = extractTags(text);
+      expect(tags.length).toEqual(1);
+      const tag0 = tags[0];
+      expect(tag0).toMatchObject({
+        name: "twitter-bootstrap"
+      });
+    });
     it("should work without spaces", () => {
       const text = "2.node.3";
       const tags = extractTags(text);

@@ -15,6 +15,6 @@ export function decodeFromHex(content: string): string {
 }
 
 export function hasSpecialCharacters(content: string): boolean {
-  var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+  var format = /[\s!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
   return format.test(content);
 }

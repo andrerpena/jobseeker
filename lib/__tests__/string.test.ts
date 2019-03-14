@@ -1,4 +1,9 @@
-import { decodeFromHex, encodeToHex, replaceAll } from "../string";
+import {
+  decodeFromHex,
+  encodeToHex,
+  hasSpecialCharacters,
+  replaceAll
+} from "../string";
 
 describe("string", () => {
   describe("replaceAll", () => {
@@ -33,6 +38,12 @@ describe("string", () => {
     it("should work", () => {
       const decoded = decodeFromHex("616e64726520697320636f6f6c");
       expect(decoded).toEqual("andre is cool");
+    });
+  });
+  describe("hasSpecialCharacters", () => {
+    it("should work with spaces", () => {
+      const x = hasSpecialCharacters("andre is cool");
+      expect(x).toEqual(true);
     });
   });
 });
