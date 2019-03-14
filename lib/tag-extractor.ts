@@ -119,7 +119,6 @@ const tagExtractionMap: ExtractionMap = {
   "excel-vba": { tokens: ["excel-vba"] },
   winforms: { tokens: ["winforms", "windows-forms"] },
   apache: { tokens: ["apache"] },
-  facebook: { tokens: ["facebook"] },
   matlab: { tokens: ["matlab"] },
   css3: { tokens: ["css3", "css-3"] },
   "entity-framework": { tokens: ["entity-framework"] },
@@ -127,7 +126,6 @@ const tagExtractionMap: ExtractionMap = {
   typescript: { tokens: ["typescript"] },
   linq: { tokens: ["linq"] },
   swing: { tokens: ["swing"] },
-  function: { tokens: ["function"] },
   qt: { tokens: ["qt"] },
   firebase: { tokens: ["firebase"] },
   api: { tokens: ["api"] },
@@ -135,7 +133,6 @@ const tagExtractionMap: ExtractionMap = {
   powershell: { tokens: ["powershell"] },
   sqlite: { tokens: ["sqlite"] },
   codeigniter: { tokens: ["codeigniter", "code-igniter"] },
-  "unit-testing": { tokens: ["unit-testing", "unit-tests", "unit-test"] },
   perl: { tokens: ["perl"] },
   symfony: { tokens: ["symfony"] },
   selenium: { tokens: ["selenium"] },
@@ -203,7 +200,7 @@ const tagExtractionMap: ExtractionMap = {
   "d3.js": { tokens: ["d3.js", "d3"] },
   recursion: { tokens: ["recursion"] },
   opengl: { tokens: ["opengl"] },
-  math: { tokens: ["math"] },
+  math: { tokens: ["math", "mathematics"] },
   xslt: { tokens: ["xslt"] },
   "selenium-webdriver": { tokens: ["selenium-webdriver"] },
   "laravel-5": { tokens: ["laravel-5"] },
@@ -318,14 +315,14 @@ const tagExtractionMap: ExtractionMap = {
   "dependency-injection": { tokens: ["dependency-injection"] },
   "drop-down-menu": { tokens: ["drop-down-menu"] },
   "visual-studio-2013": { tokens: ["visual-studio-2013"] },
-  deployment: { tokens: ["deployment"] },
-  makefile: { tokens: ["makefile"] },
-  "utf-8": { tokens: ["utf-8"] },
   nhibernate: { tokens: ["nhibernate"] },
   "sql-server-2005": { tokens: ["sql-server-2005"] },
   swift3: { tokens: ["swift3"] },
-  paypal: { tokens: ["paypal"] },
-  ".net-core": { tokens: [".net-core"] }
+  ".net-core": { tokens: [".net-core"] },
+  ansible: { tokens: ["ansible"] },
+  scipy: { tokens: ["scipy"] },
+  keras: { tokens: ["keras"] },
+  "amazon-redshift": { tokens: ["redshift", "amazon-redshift"] }
 };
 
 // build list of stuff to encode
