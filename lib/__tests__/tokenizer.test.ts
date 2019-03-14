@@ -20,7 +20,8 @@ describe("tokonizer", () => {
         "this-is-something",
         "very",
         "weird",
-        "isnt",
+        "is",
+        "nt",
         "it"
       ]);
     });

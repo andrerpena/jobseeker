@@ -3,5 +3,6 @@ export function tokenize(content: string): string[] {
     .toLowerCase()
     .replace(/[^0-9a-zA-Z\-]/g, " ")
     .replace(/ {1,}/g, " ")
-    .split(" ");
+    .split(" ")
+    .filter(t => t !== "");
 }
