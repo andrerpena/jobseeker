@@ -21,7 +21,7 @@ export function extractTags(content: string): Tag[] {
     }
   }
 
-  const tokens = tokenize(processedContent);
+  const tokens = [...new Set<string>(tokenize(processedContent))];
   // decode
   for (let i = 0; i < tokens.length; i++) {
     if (encodedList.includes(tokens[i])) {
@@ -130,8 +130,6 @@ const tagExtractionMap: ExtractionMap = {
   swing: { tokens: ["swing"] },
   function: { tokens: ["function"] },
   qt: { tokens: ["qt"] },
-  rest: { tokens: ["rest"] },
-  shell: { tokens: ["shell"] },
   firebase: { tokens: ["firebase"] },
   api: { tokens: ["api"] },
   maven: { tokens: ["maven"] },
@@ -219,13 +217,11 @@ const tagExtractionMap: ExtractionMap = {
   xslt: { tokens: ["xslt"] },
   events: { tokens: ["events"] },
   join: { tokens: ["join"] },
-  github: { tokens: ["github"] },
   "selenium-webdriver": { tokens: ["selenium-webdriver"] },
   dom: { tokens: ["dom"] },
   "laravel-5": { tokens: ["laravel-5"] },
   gradle: { tokens: ["gradle"] },
   select: { tokens: ["select"] },
-  caching: { tokens: ["caching"] },
   iis: { tokens: ["iis"] },
   button: { tokens: ["button"] },
   gcc: { tokens: ["gcc"] },
@@ -327,14 +323,11 @@ const tagExtractionMap: ExtractionMap = {
   "data-binding": { tokens: ["data-binding"] },
   highcharts: { tokens: ["highcharts"] },
   "windows-phone": { tokens: ["windows-phone"] },
-  service: { tokens: ["service"] },
   "spring-security": { tokens: ["spring-security"] },
   encoding: { tokens: ["encoding"] },
   "knockout.js": { tokens: ["knockout.js", "knockout"] },
   woocommerce: { tokens: ["woocommerce"] },
   tfs: { tokens: ["tfs"] },
-  https: { tokens: ["https"] },
-  collections: { tokens: ["collections"] },
   "visual-studio-2015": { tokens: ["visual-studio-2015"] },
   "web-applications": { tokens: ["web-applications"] },
   drupal: { tokens: ["drupal"] },

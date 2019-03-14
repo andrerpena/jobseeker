@@ -7,19 +7,60 @@ import {
 } from "../lib/bot-manager";
 import * as puppeteer from "puppeteer";
 import { Logger } from "../lib/logger";
-import { getAttributeFromElement, getTextFromElement } from "../lib/puppeteer";
+import {
+  getAttributeFromElement,
+  getInnerHtmlFromElement,
+  getTextFromElement
+} from "../lib/puppeteer";
+import { getMarkdownFromHtml, removeMarkdown } from "../lib/markdown";
+import { extractTags } from "../lib/tag-extractor";
 
 export class WeWorkRemotely implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
     return `https://weworkremotely.com${relativeUrl}`;
   }
 
-  getCompany(page: puppeteer.Page, draft: JobDraft): Promise<CompanyDetails> {
-    return undefined;
+  async getCompany(
+    page: puppeteer.Page,
+    draft: JobDraft
+  ): Promise<CompanyDetails> {
+    const h2 = await page.$(".listing-header-container");
+    const companyNameElement = await page.$(
+      ".listing-header-container .company"
+    );
+    const companyName = await getTextFromElement(page, companyNameElement);
+    const companyUrlElement = await h2.$("a:last-child");
+    const companyUrl = await getAttributeFromElement(
+      page,
+      companyUrlElement,
+      "href"
+    );
+    const companyLogoElement = await page.$(
+      ".listing-header .listing-logo img"
+    );
+    const companyLogoUrl = await getAttributeFromElement(
+      page,
+      companyLogoElement,
+      "src"
+    );
+
+    return {
+      displayName: companyName,
+      url: this.buildAbsoluteUrl(companyUrl),
+      imageUrl: companyLogoUrl
+    };
   }
 
-  getDescriptionHtml(page: puppeteer.Page, draft: JobDraft): Promise<string> {
-    return undefined;
+  async getDescriptionHtml(
+    page: puppeteer.Page,
+    draft: JobDraft
+  ): Promise<string> {
+    const description = await page.$(".listing-container");
+    const html = await getInnerHtmlFromElement(page, description);
+    if (!html) {
+      throw new Error("html was not supposed to be null");
+    }
+    return html;
   }
 
   async getJobDrafts(
@@ -27,7 +68,9 @@ export class WeWorkRemotely implements Bot {
     browser: puppeteer.Browser
   ): Promise<Array<JobDraft | null>> {
     const page = await browser.newPage();
-    await page.goto("https://weworkremotely.com/");
+    await page.goto(
+      "https://weworkremotely.com/categories/remote-programming-jobs"
+    );
     const jobSections = await page.$$("section.jobs");
     const jobLists = await Promise.all(
       jobSections.map(async jobSection => {
@@ -68,8 +111,10 @@ export class WeWorkRemotely implements Bot {
     return undefined;
   }
 
-  getTags(page: puppeteer.Page, draft: JobDraft): Promise<string[]> {
-    return undefined;
+  async getTags(page: puppeteer.Page, draft: JobDraft): Promise<string[]> {
+    const descriptionHtml = await this.getDescriptionHtml(page, draft);
+    const description = removeMarkdown(getMarkdownFromHtml(descriptionHtml));
+    return extractTags(description).map(t => t.name);
   }
 
   async getTitle(page: puppeteer.Page, draft: JobDraft): Promise<string> {
