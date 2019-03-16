@@ -9,6 +9,15 @@ const JOB_REMOTE_URL_MUST_BE_LOCATED_US =
 const JOB_GOLANG =
   "https://weworkremotely.com/remote-jobs/hashicorp-software-engineer-consul-ecosystem-golang";
 
+const JOB_NORTH_AMERICA =
+  "https://weworkremotely.com/remote-jobs/quest-automated-services-database-architect-developer";
+
+const JOB_LOCATION_UNSPECIFIED =
+  "https://weworkremotely.com/remote-jobs/gravity-wiz-technical-writer";
+
+const JOB_USA =
+  "https://weworkremotely.com/remote-jobs/mondobrain-senior-devops-engineer";
+
 const weWorkRemotely = new WeWorkRemotely();
 
 describe("WeWorkRemotely", () => {
@@ -82,6 +91,41 @@ describe("WeWorkRemotely", () => {
           "https://we-work-remotely.imgix.net/logos/0015/2171/logo.gif?ixlib=rails-2.1.3&w=190&min-h=150&auto=format",
         url: "https://weworkremotely.com/company/hashicorp"
       });
+    });
+  });
+  describe("getLocationDetails", () => {
+    it("should work for USA", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_USA);
+      const companyDetails = await weWorkRemotely.getLocationDetails(
+        page,
+        null
+      );
+      expect(companyDetails).toEqual({
+        raw: "Must be located: U.S.A.",
+        requiredLocation: "U.S.A."
+      });
+    });
+    it("should work for North America", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_NORTH_AMERICA);
+      const companyDetails = await weWorkRemotely.getLocationDetails(
+        page,
+        null
+      );
+      expect(companyDetails).toEqual({
+        raw: "Must be located: North America",
+        requiredLocation: "North America"
+      });
+    });
+    it("should work when there is no location", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_LOCATION_UNSPECIFIED);
+      const companyDetails = await weWorkRemotely.getLocationDetails(
+        page,
+        null
+      );
+      expect(companyDetails).toEqual({});
     });
   });
 });

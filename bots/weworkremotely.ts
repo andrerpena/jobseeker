@@ -20,6 +20,14 @@ export class WeWorkRemotely implements Bot {
     return `https://weworkremotely.com${relativeUrl}`;
   }
 
+  getLocationFromText(text: string) {
+    const match = text.match(/Must be located:(.*)/);
+    if (match) {
+      return match[1].trim();
+    }
+    return null;
+  }
+
   async getCompany(
     page: puppeteer.Page,
     draft: JobDraft
@@ -97,6 +105,15 @@ export class WeWorkRemotely implements Bot {
     page: puppeteer.Page,
     draft: JobDraft
   ): Promise<LocationDetails> {
+    const regionElement = await page.$(".listing-header-container .region");
+    if (regionElement) {
+      const locationRaw = await getTextFromElement(page, regionElement);
+      const location = this.getLocationFromText(locationRaw);
+      return {
+        requiredLocation: location,
+        raw: locationRaw
+      };
+    }
     return {};
   }
 
