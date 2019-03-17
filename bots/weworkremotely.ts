@@ -46,11 +46,10 @@ export class WeWorkRemotely implements Bot {
     const companyLogoElement = await page.$(
       ".listing-header .listing-logo img"
     );
-    const companyLogoUrl = await getAttributeFromElement(
-      page,
-      companyLogoElement,
-      "src"
-    );
+
+    const companyLogoUrl = companyLogoElement
+      ? await getAttributeFromElement(page, companyLogoElement, "src")
+      : "";
 
     return {
       displayName: companyName,

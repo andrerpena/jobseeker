@@ -115,6 +115,29 @@ export class BotManager {
     this.bots.push(bot);
   }
 
+  async wrapCall<T>(
+    call: () => Promise<T>,
+    defaultValue: T | null,
+    logKey: string,
+    url: string,
+    logger: BotLogger
+  ) {
+    try {
+      return await call();
+    } catch (error) {
+      await logger.logError(
+        `There was an error processing ${logKey} for URL: ${url}`,
+        error
+      );
+    }
+    if (defaultValue) {
+      return defaultValue;
+    }
+    throw new Error(
+      `The bot failed to return the ${logKey} value for URL ${url}. Aborting`
+    );
+  }
+
   async saveJob(bot: Bot, draft: JobDraft, logger: BotLogger): Promise<any> {
     const browser = await this.browserPromise;
     const page = await browser.newPage();
@@ -122,22 +145,73 @@ export class BotManager {
     try {
       await logger.logInfo("Start processJob");
       await page.goto(draft.link);
-      const shouldProceed = await bot.shouldCapture(page);
+      const shouldProceed = await this.wrapCall(
+        () => bot.shouldCapture(page),
+        true,
+        "shouldCapture",
+        draft.link,
+        logger
+      );
       if (!shouldProceed) {
         await logger.logInfo(`Ignoring job: ${draft.link}`);
         return;
       }
 
       const source = bot.getName();
-      const title = await bot.getTitle(page, draft);
-      const publishedAt = await bot.getUtcPublishedAt(page, draft);
-      const description = getMarkdownFromHtml(
-        await bot.getDescriptionHtml(page, draft)
+      const title = await this.wrapCall(
+        () => bot.getTitle(page, draft),
+        null,
+        "getTitle",
+        draft.link,
+        logger
       );
-      const tags = await bot.getTags(page, draft);
-      const locationDetails = await bot.getLocationDetails(page, draft);
-      const salaryDetails = await bot.getSalaryDetails(page, draft);
-      const companyDetails = await bot.getCompany(page, draft);
+      const publishedAt = await this.wrapCall(
+        () => bot.getUtcPublishedAt(page, draft),
+        new Date(),
+        "getUtcPublishedAt",
+        draft.link,
+        logger
+      );
+      const description = getMarkdownFromHtml(
+        await this.wrapCall(
+          () => bot.getDescriptionHtml(page, draft),
+          "getDescriptionHtml",
+          null,
+          draft.link,
+          logger
+        )
+      );
+      const tags = await this.wrapCall(
+        () => bot.getTags(page, draft),
+        null,
+        "getTags",
+        draft.link,
+        logger
+      );
+
+      const locationDetails = await this.wrapCall<LocationDetails>(
+        () => bot.getLocationDetails(page, draft),
+        {},
+        "getLocationDetails",
+        draft.link,
+        logger
+      );
+
+      const salaryDetails = await this.wrapCall<SalaryDetails>(
+        () => bot.getSalaryDetails(page, draft),
+        {},
+        "getSalaryDetails",
+        draft.link,
+        logger
+      );
+
+      const companyDetails = await this.wrapCall(
+        () => bot.getCompany(page, draft),
+        null,
+        "getCompany",
+        draft.link,
+        logger
+      );
 
       const getCompanyResult = await getCompany({
         id: undefined,

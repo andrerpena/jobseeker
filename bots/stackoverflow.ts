@@ -231,15 +231,10 @@ export class Stackoverflow implements Bot {
     }
 
     const companyImageLink = await overview.$(".s-avatar img");
-    if (!companyImageLink) {
-      throw new Error("companyImageLink was not supposed to be null");
-    }
 
-    const companyImageUrl = await getAttributeFromElement(
-      page,
-      companyImageLink,
-      "src"
-    );
+    const companyImageUrl = companyImageLink
+      ? await getAttributeFromElement(page, companyImageLink, "src")
+      : "";
 
     return {
       displayName: companyName,
