@@ -1,5 +1,11 @@
 export type Maybe<T> = T | null;
 
+export interface TagCountGroupInput {
+  name: string;
+
+  tags: string[];
+}
+
 export interface JobInput {
   title: string;
 
@@ -111,10 +117,10 @@ export namespace GetCompany {
   export type Query = {
     __typename?: "Query";
 
-    company: Maybe<Company>;
+    getCompany: Maybe<GetCompany>;
   };
 
-  export type Company = {
+  export type GetCompany = {
     __typename?: "Company";
 
     id: string;

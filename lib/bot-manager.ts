@@ -218,8 +218,8 @@ export class BotManager {
         urlReference: companyDetails.url
       });
       let companyId: string;
-      if (getCompanyResult.data.company) {
-        companyId = getCompanyResult.data.company.id;
+      if (getCompanyResult.data.getCompany) {
+        companyId = getCompanyResult.data.getCompany.id;
       } else {
         const addCompanyResult = await addCompany({
           input: {

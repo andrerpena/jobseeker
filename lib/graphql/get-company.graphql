@@ -1,5 +1,5 @@
 query getCompany($id: String, $urlReference: String) {
-  company(id: $id, urlReference: $urlReference) {
+  getCompany(id: $id, urlReference: $urlReference) {
     id
   }
 }
