@@ -2,7 +2,7 @@ import { BotLogger, Logger } from "./logger";
 import colors from "colors";
 import puppeteer from "puppeteer";
 import { JobInput } from "../graphql-types";
-import { addCompany, addJob, getCompany } from "./graphql-client";
+import { addCompany, addJob, getCompany, getJob } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
 import { launchPuppeteer } from "./puppeteer";
 
@@ -165,6 +165,7 @@ export class BotManager {
         draft.link,
         logger
       );
+
       const publishedAt = await this.wrapCall(
         () => bot.getUtcPublishedAt(page, draft),
         new Date(),
@@ -172,6 +173,7 @@ export class BotManager {
         draft.link,
         logger
       );
+
       const description = getMarkdownFromHtml(
         await this.wrapCall(
           () => bot.getDescriptionHtml(page, draft),
@@ -181,6 +183,7 @@ export class BotManager {
           logger
         )
       );
+
       const tags = await this.wrapCall(
         () => bot.getTags(page, draft),
         null,
@@ -215,7 +218,7 @@ export class BotManager {
 
       const getCompanyResult = await getCompany({
         id: undefined,
-        urlReference: companyDetails.url
+        url: companyDetails.url
       });
       let companyId: string;
       if (getCompanyResult.data.getCompany) {
@@ -307,6 +310,11 @@ export class BotManager {
       let counter = 0;
       for (let draft of drafts) {
         if (counter < RATE_LIMIT) {
+          const existingJob = await getJob({ jobUrl: draft.link });
+          if (existingJob.data.getJob != null) {
+            logger.logInfo(`Skipping ${draft.link} because it existed already`);
+            continue;
+          }
           const data = await this.saveJob(bot, draft, logger);
           if (data) {
             counter++;

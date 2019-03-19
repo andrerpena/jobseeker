@@ -111,7 +111,7 @@ export namespace AddJob {
 export namespace GetCompany {
   export type Variables = {
     id?: Maybe<string>;
-    urlReference?: Maybe<string>;
+    url?: Maybe<string>;
   };
 
   export type Query = {
@@ -122,6 +122,24 @@ export namespace GetCompany {
 
   export type GetCompany = {
     __typename?: "Company";
+
+    id: string;
+  };
+}
+
+export namespace GetJob {
+  export type Variables = {
+    jobUrl: string;
+  };
+
+  export type Query = {
+    __typename?: "Query";
+
+    getJob: Maybe<GetJob>;
+  };
+
+  export type GetJob = {
+    __typename?: "Job";
 
     id: string;
   };

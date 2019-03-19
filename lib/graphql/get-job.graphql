@@ -1,0 +1,5 @@
+query getJob($jobUrl: String!) {
+  getJob(url: $jobUrl) {
+    id
+  }
+}

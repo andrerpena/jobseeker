@@ -4,13 +4,17 @@ import {
   AddCompany,
   AddJob,
   GetCompany,
-  JobInput
+  JobInput,
+  GetJob
 } from "../graphql-types";
 import "cross-fetch/polyfill";
 import * as graphql from "graphql";
 import * as fs from "fs";
 import * as path from "path";
 
+const getJobQuery = graphql.parse(
+  fs.readFileSync(path.join(__dirname, "/graphql/get-job.graphql")).toString()
+);
 const addCompanyMutation = graphql.parse(
   fs
     .readFileSync(path.join(__dirname, "/graphql/add-company.graphql"))
@@ -28,6 +32,13 @@ const getCompanyQuery = graphql.parse(
 const client = new ApolloClient({
   uri: "http://localhost:3000/graphql"
 });
+
+export function getJob(variables: GetJob.Variables) {
+  return client.query<GetJob.Query, GetJob.Variables>({
+    query: getJobQuery,
+    variables
+  });
+}
 
 export function addCompany(variables: AddCompany.Variables) {
   return client.mutate<AddCompany.Mutation, AddCompany.Variables>({
