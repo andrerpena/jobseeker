@@ -33,6 +33,7 @@ export class AuthenticJobs implements Bot {
       if (match) {
         return match[1].trim();
       }
+      return processedText;
     }
     return null;
   }

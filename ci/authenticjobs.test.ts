@@ -17,6 +17,9 @@ const JOB_URL_ANYWHERE =
 const JOB_URL_ANYWHERE_IN_THE_WORLD =
   "https://authenticjobs.com/jobs/31269/web-developer";
 
+const JOB_URL_SPECIFIC_REGION =
+  "https://authenticjobs.com/jobs/31285/marketing-and-content-specialist";
+
 describe("AuthenticJobs", () => {
   jest.setTimeout(30000);
 
@@ -115,6 +118,15 @@ describe("AuthenticJobs", () => {
       expect(companyDetails).toEqual({
         raw: "Anywhere in the world",
         requiredLocation: null
+      });
+    });
+    it("should work for specific region", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_URL_SPECIFIC_REGION);
+      const companyDetails = await authenticJobs.getLocationDetails(page);
+      expect(companyDetails).toEqual({
+        raw: "Gilbert, Arizona",
+        requiredLocation: "Gilbert, Arizona"
       });
     });
   });
