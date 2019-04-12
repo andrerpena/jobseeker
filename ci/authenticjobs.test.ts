@@ -72,4 +72,12 @@ describe("AuthenticJobs", () => {
       ]);
     });
   });
+  describe("getUtcPublishedAt", async () => {
+    it("should work", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_REMOTE_URL);
+      const date = await authenticJobs.getUtcPublishedAt(page, null);
+      expect(date).toEqual(new Date("2019-04-11T19:46:03.000Z"));
+    });
+  });
 });

@@ -99,6 +99,10 @@ export class AuthenticJobs implements Bot {
     page: puppeteer.Page,
     draft: JobDraft
   ): Promise<Date | null> {
-    throw new Error("Not implemented");
+    const header = await page.$("#the_listing time");
+    const dateString = await getAttributeFromElement(page, header, "datetime");
+    const d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+    d.setUTCSeconds(dateString);
+    return d;
   }
 }
