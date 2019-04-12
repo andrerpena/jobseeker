@@ -125,7 +125,31 @@ export class AuthenticJobs implements Bot {
   }
 
   async getCompany(page: puppeteer.Page): Promise<CompanyDetails> {
-    throw new Error("Not implemented");
+    const overview = await page.$("#the_company header");
+    if (!overview) {
+      throw new Error("overview was not supposed to be null");
+    }
+    const companyNameElement = await overview.$(".headings h1");
+    if (!companyNameElement) {
+      throw new Error("companyNameElement was not supposed to be null");
+    }
+    const companyName = await getTextFromElement(page, companyNameElement);
+
+    if (!companyName) {
+      throw new Error("companyName was not supposed to be null");
+    }
+
+    const companyImageLink = await overview.$("a img");
+
+    const companyImageUrl = companyImageLink
+      ? await getAttributeFromElement(page, companyImageLink, "src")
+      : "";
+
+    return {
+      displayName: companyName,
+      url: "",
+      imageUrl: companyImageUrl
+    };
   }
 
   async getUtcPublishedAt(

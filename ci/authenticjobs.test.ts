@@ -129,5 +129,18 @@ describe("AuthenticJobs", () => {
         requiredLocation: "Gilbert, Arizona"
       });
     });
+    describe("getCompany", async () => {
+      it("should work", async () => {
+        const page = await browser.newPage();
+        await page.goto(JOB_URL_SPECIFIC_REGION);
+        const company = await authenticJobs.getCompany(page);
+        expect(company).toEqual({
+          displayName: "Historic Agency",
+          imageUrl:
+            "https://authenticjobs.s3.amazonaws.com/uploads/logos/9ebe22dffbde73b0f08983e653e680fd/hEb5mJdH_400x400.jpg",
+          url: ""
+        });
+      });
+    });
   });
 });
