@@ -192,6 +192,11 @@ export class BotManager {
         logger
       );
 
+      if (!tags || tags.length === 0) {
+        await logger.logInfo(`Ignoring job because of no tags: ${draft.link}`);
+        return;
+      }
+
       const locationDetails = await this.wrapCall<LocationDetails>(
         () => bot.getLocationDetails(page, draft),
         {},
