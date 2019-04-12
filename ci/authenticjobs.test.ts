@@ -8,6 +8,15 @@ const authenticJobs = new AuthenticJobs();
 const JOB_REMOTE_URL =
   "https://authenticjobs.com/jobs/31311/senior-front-end-developer";
 
+const JOB_REMOTE_URL_US =
+  "https://authenticjobs.com/jobs/31264/senior-front-end-engineer-ember-js";
+
+const JOB_URL_ANYWHERE =
+  "https://authenticjobs.com/jobs/31308/copywriter-with-an-seo-emphasis";
+
+const JOB_URL_ANYWHERE_IN_THE_WORLD =
+  "https://authenticjobs.com/jobs/31269/web-developer";
+
 describe("AuthenticJobs", () => {
   jest.setTimeout(30000);
 
@@ -78,6 +87,35 @@ describe("AuthenticJobs", () => {
       await page.goto(JOB_REMOTE_URL);
       const date = await authenticJobs.getUtcPublishedAt(page, null);
       expect(date).toEqual(new Date("2019-04-11T19:46:03.000Z"));
+    });
+  });
+  describe("getLocationDetails", () => {
+    it("should work for USA", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_REMOTE_URL_US);
+      const companyDetails = await authenticJobs.getLocationDetails(page);
+      expect(companyDetails).toEqual({
+        raw: "Anywhere in United States",
+        requiredLocation: "United States"
+      });
+    });
+    it("should work for Anywhere", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_URL_ANYWHERE);
+      const companyDetails = await authenticJobs.getLocationDetails(page);
+      expect(companyDetails).toEqual({
+        raw: "Anywhere",
+        requiredLocation: null
+      });
+    });
+    it("should work for Anywhere in the World", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_URL_ANYWHERE_IN_THE_WORLD);
+      const companyDetails = await authenticJobs.getLocationDetails(page);
+      expect(companyDetails).toEqual({
+        raw: "Anywhere in the world",
+        requiredLocation: null
+      });
     });
   });
 });

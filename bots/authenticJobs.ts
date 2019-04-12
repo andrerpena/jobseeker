@@ -20,6 +20,23 @@ export class AuthenticJobs implements Bot {
     return `https://authenticjobs.com${relativeUrl}`;
   }
 
+  getLocationFromText(text: string) {
+    if (text) {
+      const processedText = text;
+      if (
+        processedText === "Anywhere in the world" ||
+        processedText === "Anywhere"
+      ) {
+        return null;
+      }
+      const match = processedText.match(/Anywhere in (.*)/);
+      if (match) {
+        return match[1].trim();
+      }
+    }
+    return null;
+  }
+
   extractLocationDetails(remoteDetails: string): LocationDetails {
     throw new Error("Not implemented");
   }
@@ -62,7 +79,22 @@ export class AuthenticJobs implements Bot {
   }
 
   async getLocationDetails(page: puppeteer.Page): Promise<LocationDetails> {
-    throw new Error("Not implemented");
+    let regionElement = await page.$("#location a");
+    if (!regionElement) {
+      regionElement = await page.$(".ss-location");
+    }
+    if (regionElement) {
+      let locationRaw = await getTextFromElement(page, regionElement);
+      if (locationRaw) {
+        locationRaw = locationRaw.trim().replace(/(\r\n|\n|\r)/gm, "");
+      }
+      const location = this.getLocationFromText(locationRaw);
+      return {
+        requiredLocation: location,
+        raw: locationRaw
+      };
+    }
+    return {};
   }
 
   async getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails> {
