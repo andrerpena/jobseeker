@@ -311,19 +311,25 @@ export class BotManager {
       await logger.logInfo(`Jobs found: ${drafts.length}`);
       let counter = 0;
       for (let draft of drafts) {
-        if (counter < RATE_LIMIT) {
-          const existingJob = await getJob({ jobUrl: draft.link });
-          if (existingJob.data.getJob != null) {
-            logger.logInfo(`Skipping ${draft.link} because it existed already`);
-            continue;
+        try {
+          if (counter < RATE_LIMIT) {
+            logger.logInfo(`counter: ${counter}`);
+            const existingJob = await getJob({ jobUrl: draft.link });
+            if (existingJob.data.getJob != null) {
+              logger.logInfo(
+                `Skipping ${draft.link} because it existed already`
+              );
+              continue;
+            }
+            const data = await this.saveJob(bot, draft, logger);
+            if (data) {
+              logger.logInfo(`Processed ${counter} jobs`);
+            }
+          } else {
+            break;
           }
-          const data = await this.saveJob(bot, draft, logger);
-          if (data) {
-            counter++;
-            logger.logInfo(`Processed ${counter} jobs`);
-          }
-        } else {
-          break;
+        } finally {
+          counter++;
         }
       }
     }
