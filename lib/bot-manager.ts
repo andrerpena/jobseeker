@@ -6,7 +6,7 @@ import { addCompany, addJob, getCompany, getJob } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
 import { launchPuppeteer } from "./puppeteer";
 
-const RATE_LIMIT = 20;
+const RATE_LIMIT = 30;
 
 export interface LocationDetails {
   raw?: string;
