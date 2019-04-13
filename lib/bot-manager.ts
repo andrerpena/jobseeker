@@ -27,7 +27,6 @@ export interface SalaryDetails {
 
 export interface CompanyDetails {
   displayName: string;
-  url: string;
   imageUrl: string;
 }
 
@@ -231,7 +230,6 @@ export class BotManager {
         const addCompanyResult = await addCompany({
           input: {
             displayName: companyDetails.displayName,
-            url: companyDetails.url,
             imageUrl: companyDetails.imageUrl
           }
         });

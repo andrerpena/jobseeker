@@ -1,7 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`AuthenticJobs getDescriptionHtml should work 1`] = `
-"<div id=\\"posted\\" class=\\"ss-gizmo ss-stopwatch\\"><time datetime=\\"1555011963\\">Posted Yesterday</time> – Accepting applications</div>
+"<div id=\\"posted\\" class=\\"ss-gizmo ss-stopwatch\\"><time datetime=\\"1555011963\\">Posted Apr 11</time> – Accepting applications</div>
     
     <p style=\\"box-sizing: border-box; margin: 0px 0px 10px; padding: 0px; color: #2d2d2d; font-family: HelveticaNeue, Helvetica, Arial, sans-serif; font-size: 14px; background-color: #ffffff;\\"><strong style=\\"box-sizing: border-box;\\">Who We Are</strong></p>
 

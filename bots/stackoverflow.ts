@@ -63,7 +63,7 @@ export class Stackoverflow implements Bot {
       return result;
     }
     return {
-      raw: normalizedSalary,
+      raw: normalizedSalary ? normalizedSalary.trim() : normalizedSalary,
       currency: match1[1].trim(),
       min: parseFloat(match1[2]) * 1000,
       max: parseFloat(match1[3]) * 1000,
@@ -224,12 +224,6 @@ export class Stackoverflow implements Bot {
       throw new Error("companyName was not supposed to be null");
     }
 
-    const companyLink = await getAttributeFromElement(page, link, "href");
-
-    if (!companyLink) {
-      throw new Error("companyLink was not supposed to be null");
-    }
-
     const companyImageLink = await overview.$(".s-avatar img");
 
     const companyImageUrl = companyImageLink
@@ -238,7 +232,6 @@ export class Stackoverflow implements Bot {
 
     return {
       displayName: companyName,
-      url: this.buildAbsoluteUrl(companyLink),
       imageUrl: companyImageUrl
     };
   }

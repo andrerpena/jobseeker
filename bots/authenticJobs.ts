@@ -147,7 +147,6 @@ export class AuthenticJobs implements Bot {
 
     return {
       displayName: companyName,
-      url: "",
       imageUrl: companyImageUrl
     };
   }

@@ -32,17 +32,11 @@ export class WeWorkRemotely implements Bot {
     page: puppeteer.Page,
     draft: JobDraft
   ): Promise<CompanyDetails> {
-    const h2 = await page.$(".listing-header-container");
     const companyNameElement = await page.$(
       ".listing-header-container .company"
     );
     const companyName = await getTextFromElement(page, companyNameElement);
-    const companyUrlElement = await h2.$("a:last-child");
-    const companyUrl = await getAttributeFromElement(
-      page,
-      companyUrlElement,
-      "href"
-    );
+
     const companyLogoElement = await page.$(
       ".listing-header .listing-logo img"
     );
@@ -53,7 +47,6 @@ export class WeWorkRemotely implements Bot {
 
     return {
       displayName: companyName,
-      url: this.buildAbsoluteUrl(companyUrl),
       imageUrl: companyLogoUrl
     };
   }
@@ -135,7 +128,7 @@ export class WeWorkRemotely implements Bot {
 
   async getTitle(page: puppeteer.Page, draft: JobDraft): Promise<string> {
     const header = await page.$(".listing-header-container h1");
-    return getTextFromElement(page, header);
+    return (await getTextFromElement(page, header)).trim();
   }
 
   async getUtcPublishedAt(
