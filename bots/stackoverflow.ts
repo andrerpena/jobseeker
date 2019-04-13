@@ -15,6 +15,7 @@ import {
   getTextFromElement
 } from "../lib/puppeteer";
 import { getTimeAgoFromString, getTimeFromTimeAgo } from "../lib/date";
+import { removeQueryString } from "../lib/url/url";
 
 export class Stackoverflow implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
@@ -196,7 +197,7 @@ export class Stackoverflow implements Bot {
         throw new Error("timeString was not supposed to be null");
       }
       return {
-        link: this.buildAbsoluteUrl(url),
+        link: removeQueryString(this.buildAbsoluteUrl(url)),
         draft: {
           date: getTimeFromTimeAgo(getTimeAgoFromString(timeString), new Date())
         }
