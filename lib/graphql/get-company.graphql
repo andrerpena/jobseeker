@@ -1,5 +1,5 @@
-query getCompany($id: String, $url: String) {
-  getCompany(id: $id, url: $url) {
+query getCompany($displayName: String!) {
+  getCompany(displayName: $displayName) {
     id
   }
 }

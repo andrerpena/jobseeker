@@ -222,8 +222,7 @@ export class BotManager {
       );
 
       const getCompanyResult = await getCompany({
-        id: undefined,
-        url: companyDetails.url
+        displayName: companyDetails.displayName
       });
       let companyId: string;
       if (getCompanyResult.data.getCompany) {
