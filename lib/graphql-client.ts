@@ -11,6 +11,11 @@ import "cross-fetch/polyfill";
 import * as graphql from "graphql";
 import * as fs from "fs";
 import * as path from "path";
+import { config } from "dotenv";
+
+config();
+
+const GRAPHQL_AUTH_TOKEN = process.env.GRAPHQL_AUTH_TOKEN;
 
 const getJobQuery = graphql.parse(
   fs.readFileSync(path.join(__dirname, "/graphql/get-job.graphql")).toString()
@@ -30,7 +35,10 @@ const getCompanyQuery = graphql.parse(
 );
 
 const client = new ApolloClient({
-  uri: "http://localhost:3000/graphql"
+  uri: "http://localhost:3000/graphql",
+  headers: {
+    Authorization: GRAPHQL_AUTH_TOKEN
+  }
 });
 
 export function getJob(variables: GetJob.Variables) {
