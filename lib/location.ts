@@ -1,58 +1,58 @@
-export const US_ONLY = "us-only";
-export const NORTH_AMERICA_ONLY = "north-america-only";
-export const EUROPE_ONLY = "europe-only";
-export const UK_ONLY = "uk-only";
+// general
+const prefixes = ["location", "location:"];
+const suffixes = ["only", "residents", "candidates", "based"];
 
-export function checkArray(text: string, itemsToCheck: string[]) {
-  for (let item of itemsToCheck) {
-    if (text.toLowerCase().indexOf(item.toLowerCase()) !== -1) {
-      return true;
+// location specific
+const us = ["US", "USA", "U.S.A", "U.S.A", "United States"];
+const europe = ["Europe", "EU", "European Union"];
+const uk = ["UK", "United Kingdom", "England"];
+const northAmerica = ["north america", ...flatten([us, ["canada"]])];
+const americas = ["americas", "north south america"];
+const emea = ["emea", "europe middle east africa"];
+const mena = ["mena", "Middle East North Africa"];
+const northAmericaAndEurope = flatten([northAmerica, europe]);
+const americasAndEurope = flatten([americas, europe]);
+const africa = ["africa"];
+const australia = ["australia"];
+const oceania = ["oceania"];
+
+export function flatten(input: string[][]): string[] {
+  if (input.length === 0) {
+    return [];
+  }
+  if (input.length === 1) {
+    return input[0];
+  }
+  const flattenedChildren = flatten(input.slice(1, input.length));
+  const result: string[] = [];
+  for (let item of input[0]) {
+    for (let child of flattenedChildren) {
+      result.push(item.toLowerCase() + " " + child.toLowerCase());
     }
   }
-  return false;
-}
-
-export function checkLocation(
-  prefixTokens: string[],
-  locationTokens: string[],
-  suffixTokens: string[],
-  title: string,
-  description: string
-): boolean {
-  const itemsToCheck = merge(
-    combine(prefixTokens, locationTokens),
-    combine(locationTokens, suffixTokens)
-  );
-  return (
-    checkArray(title, itemsToCheck) || checkArray(description, itemsToCheck)
-  );
-}
-
-export function merge(array1: string[], array2: string[]): string[] {
-  return [...new Set([...array1, ...array2])];
-}
-
-// Returns an array with all the combinations of array 1 and 2
-export function combine(...args: Array<string[]>): string[] {
-  let result: string[] = [];
-
-  function combineToArrays(array1: string[], array2: string[]) {
-    if (array1.length === 0) return array2;
-    if (array2.length === 0) return array1;
-    const result = [];
-    for (let i = 0; i < array1.length; i++) {
-      for (let j = 0; j < array2.length; j++) {
-        result.push(`${array1[i]} ${array2[j]}`);
-      }
-    }
-    return result;
-  }
-
-  for (let array of args) {
-    result = combineToArrays(result, array);
-  }
-
   return result;
+}
+
+export function stripText(input: string) {
+  let inputProcessed = input.toLowerCase().replace(/[^a-zA-Z ]/g, "");
+  // remove prepositions
+  inputProcessed = inputProcessed.replace(" or ", " ");
+  inputProcessed = inputProcessed.replace(" and ", " ");
+  inputProcessed = inputProcessed.replace(" of ", " ");
+  return inputProcessed.replace(" & ", " ").replace(/\s+/g, " ");
+}
+
+export function findInCombinations(textToFind: string, combinations: string[]) {
+  return (
+    combinations.findIndex(
+      c => stripText(textToFind).indexOf(stripText(c)) !== -1
+    ) !== -1
+  );
+}
+
+export interface LocationTagMatcher {
+  locationTag: string;
+  combinations: string[];
 }
 
 export function extractLocationTag(
@@ -60,80 +60,82 @@ export function extractLocationTag(
   jobTitle: string,
   jobDescription: string
 ): string | null {
-  const prefixes = ["only", "location", "location:"];
-  const suffixes = ["only", "residents", "candidates", "based"];
-
-  const usOnlyTags = ["US", "USA", "U.S.A", "U.S.A", "United States"];
-  const northAmericaOnlyTags = [
-    ...combine(usOnlyTags, ["and", "or", "&"], ["canada"]),
-    "North America"
+  const locationRequiredMatchers: LocationTagMatcher[] = [
+    {
+      locationTag: "north-america-and-europe-only",
+      combinations: northAmericaAndEurope
+    },
+    {
+      locationTag: "americas-and-europe-only",
+      combinations: americasAndEurope
+    },
+    {
+      locationTag: "north-america-only",
+      combinations: northAmerica
+    },
+    {
+      locationTag: "americas-only",
+      combinations: americas
+    },
+    {
+      locationTag: "us-only",
+      combinations: us
+    },
+    {
+      locationTag: "europe-only",
+      combinations: europe
+    },
+    {
+      locationTag: "uk-only",
+      combinations: uk
+    },
+    {
+      locationTag: "emea-only",
+      combinations: emea
+    },
+    {
+      locationTag: "mena-only",
+      combinations: mena
+    },
+    {
+      locationTag: "africa-only",
+      combinations: africa
+    },
+    {
+      locationTag: "oceania-only",
+      combinations: oceania
+    },
+    {
+      locationTag: "australia-only",
+      combinations: australia
+    }
   ];
-  const europeOnlyTags = ["Europe", "EU", "European Union"];
-  const ukOnlyTags = ["UK", "United Kingdom", "England"];
 
-  // First, we check location required, if they exist
-  if (locationRequired) {
-    if (checkArray(locationRequired, northAmericaOnlyTags)) {
-      return NORTH_AMERICA_ONLY;
+  // process location required
+  for (let matcher of locationRequiredMatchers) {
+    // process location required
+    if (findInCombinations(locationRequired, matcher.combinations)) {
+      return matcher.locationTag;
     }
-    if (checkArray(locationRequired, usOnlyTags)) {
-      return US_ONLY;
+    // process title and body
+    if (
+      findInCombinations(jobTitle, flatten([prefixes, matcher.combinations])) ||
+      findInCombinations(jobTitle, flatten([matcher.combinations, suffixes]))
+    ) {
+      return matcher.locationTag;
     }
-    if (checkArray(locationRequired, europeOnlyTags)) {
-      return EUROPE_ONLY;
+    if (
+      findInCombinations(
+        jobDescription,
+        flatten([prefixes, matcher.combinations])
+      ) ||
+      findInCombinations(
+        jobDescription,
+        flatten([matcher.combinations, suffixes])
+      )
+    ) {
+      return matcher.locationTag;
     }
-    if (checkArray(locationRequired, ukOnlyTags)) {
-      return UK_ONLY;
-    }
   }
-
-  // now we check in the title and description
-  const northAmericaOnly = checkLocation(
-    prefixes,
-    northAmericaOnlyTags,
-    suffixes,
-    jobTitle,
-    jobDescription
-  );
-
-  if (northAmericaOnly) {
-    return NORTH_AMERICA_ONLY;
-  }
-
-  const usOnly = checkLocation(
-    prefixes,
-    usOnlyTags,
-    suffixes,
-    jobTitle,
-    jobDescription
-  );
-
-  if (usOnly) {
-    return US_ONLY;
-  }
-
-  const europeOnly = checkLocation(
-    prefixes,
-    europeOnlyTags,
-    suffixes,
-    jobTitle,
-    jobDescription
-  );
-
-  if (europeOnly) {
-    return EUROPE_ONLY;
-  }
-
-  const ukOnly = checkLocation(
-    prefixes,
-    ukOnlyTags,
-    suffixes,
-    jobTitle,
-    jobDescription
-  );
-  if (ukOnly) {
-    return UK_ONLY;
-  }
-
   return null;
 }

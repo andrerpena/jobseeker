@@ -1,4 +1,9 @@
-import { combine, extractLocationTag, merge } from "../location";
+import {
+  extractLocationTag,
+  findInCombinations,
+  flatten,
+  stripText
+} from "../location";
 
 describe("location", () => {
   describe("extractLocationTag", () => {
@@ -48,17 +53,26 @@ describe("location", () => {
       expect(locationTag).toEqual("north-america-only");
     });
   });
-  describe("combine", () => {
-    it("should work with 2", () => {
-      expect(combine(["a"], ["a", "b"])).toEqual(["a a", "a b"]);
-    });
-    it("should work with 3", () => {
-      expect(combine(["a"], ["and", "&"], ["b"])).toEqual(["a and b", "a & b"]);
+  describe("stripText", () => {
+    it("should remove and, or and duplicate white-spaces", () => {
+      expect(stripText("north  america and \n  canada")).toEqual(
+        "north america canada"
+      );
     });
   });
-  describe("merge", () => {
-    it("should work", () => {
-      expect(merge(["a"], ["a", "b"])).toEqual(["a", "b"]);
+  describe("findInCombinations", () => {
+    it("should work when it exists", () => {
+      expect(
+        findInCombinations("this is the united states america", [
+          "united states of america",
+          "haha"
+        ])
+      ).toEqual(true);
+    });
+    it("should work when it does not exist", () => {
+      expect(
+        findInCombinations("america", ["europe is cool", "jesus"])
+      ).toEqual(false);
     });
   });
 });
