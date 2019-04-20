@@ -19,7 +19,11 @@ describe("location", () => {
       expect(locationTag).toEqual(null);
     });
     it("should get us-only tags from title", () => {
-      const locationTag = extractLocationTag("", "us only please", "blablabla");
+      const locationTag = extractLocationTag(
+        "",
+        "us residents please",
+        "blablabla"
+      );
       expect(locationTag).toEqual("us-only");
     });
     it("should get us-only tags from description", () => {
@@ -49,24 +53,17 @@ describe("location", () => {
 
     it("should work with north america as us and canada", () => {
       const locationTag = extractLocationTag(
-        "this is only for us and canada people",
+        "north america",
         "blablabla",
         "this is fooor uk based people"
       );
       expect(locationTag).toEqual("north-america-only");
     });
   });
-  describe("stripText", () => {
-    it("should remove and, or and duplicate white-spaces", () => {
-      expect(stripText("north  america and \n  canada")).toEqual(
-        "north america canada"
-      );
-    });
-  });
   describe("findInCombinations", () => {
     it("should work when it exists", () => {
       expect(
-        findInCombinations("this is the united states america", [
+        findInCombinations("this is the united states of america", [
           "united states of america",
           "haha"
         ])
@@ -80,7 +77,20 @@ describe("location", () => {
   });
   describe("flatten", () => {
     it("should work", () => {
-      expect(flatten([northAmerica, conjunctions, europe])).toEqual([]);
+      expect(flatten([["a", "b"], conjunctions, ["c", "d"]])).toEqual([
+        "a and c",
+        "a and d",
+        "a or c",
+        "a or d",
+        "a & c",
+        "a & d",
+        "b and c",
+        "b and d",
+        "b or c",
+        "b or d",
+        "b & c",
+        "b & d"
+      ]);
     });
   });
 });
