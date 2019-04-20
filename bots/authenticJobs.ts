@@ -66,8 +66,9 @@ export class AuthenticJobs implements Bot {
 
   async getTags(page: puppeteer.Page): Promise<string[]> {
     const descriptionHtml = await this.getDescriptionHtml(page);
+    const title = await this.getTitle(page);
     const description = removeMarkdown(getMarkdownFromHtml(descriptionHtml));
-    return extractTags(description).map(t => t.name);
+    return extractTags(title + " " + description).map(t => t.name);
   }
 
   async getDescriptionHtml(page: puppeteer.Page): Promise<string> {

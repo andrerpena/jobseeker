@@ -5,6 +5,7 @@ import { JobInput } from "../graphql-types";
 import { addCompany, addJob, getCompany, getJob } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
 import { launchPuppeteer } from "./puppeteer";
+import { extractLocationTag } from "./location";
 
 const RATE_LIMIT = 30;
 
@@ -247,6 +248,12 @@ export class BotManager {
         throw Error("COMPANY SHOULD NOT BE NULL");
       }
 
+      const locationTag = extractLocationTag(
+        locationDetails ? locationDetails.requiredLocation : "",
+        title,
+        description
+      );
+
       const job: JobInput = {
         title,
         description,
@@ -269,6 +276,7 @@ export class BotManager {
         salaryMax: salaryDetails.max,
         salaryCurrency: salaryDetails.currency,
         salaryEquity: salaryDetails.equity,
+        locationTag: locationTag,
         source
       };
 

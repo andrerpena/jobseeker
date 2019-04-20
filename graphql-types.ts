@@ -27,6 +27,8 @@ export interface JobInput {
 
   locationPreferredTimezoneTolerance?: Maybe<number>;
 
+  locationTag?: Maybe<string>;
+
   salaryRaw?: Maybe<string>;
 
   salaryExact?: Maybe<number>;
@@ -48,14 +50,6 @@ export interface CompanyInput {
   displayName: string;
 
   imageUrl?: Maybe<string>;
-}
-
-export interface UpdateSourceInput {
-  name: string;
-
-  updateMessage: string;
-
-  updateMessageDetails?: Maybe<string>;
 }
 
 export enum CacheControlScope {
