@@ -1,17 +1,26 @@
 // general
 const prefixes = ["location", "location:"];
-const suffixes = ["only", "residents", "candidates", "based"];
+const suffixes = ["residents", "candidates", "based"];
+export const conjunctions = ["and", "or", "&"];
 
 // location specific
 const us = ["US", "USA", "U.S.A", "U.S.A", "United States"];
-const europe = ["Europe", "EU", "European Union"];
+export const europe = ["Europe", "EU", "European Union"];
 const uk = ["UK", "United Kingdom", "England"];
-const northAmerica = ["north america", ...flatten([us, ["canada"]])];
-const americas = ["americas", "north south america"];
+export const northAmerica = [
+  "north america",
+  ...flatten([us, conjunctions, ["canada"]])
+];
+const americas = ["americas", "north and south america"];
 const emea = ["emea", "europe middle east africa"];
 const mena = ["mena", "Middle East North Africa"];
-const northAmericaAndEurope = flatten([northAmerica, europe]);
-const americasAndEurope = flatten([americas, europe]);
+const usAndEurope = flatten([us, conjunctions, europe]);
+export const northAmericaAndEurope = flatten([
+  northAmerica,
+  conjunctions,
+  europe
+]);
+const americasAndEurope = flatten([americas, conjunctions, europe]);
 const africa = ["africa"];
 const australia = ["australia"];
 const oceania = ["oceania"];
@@ -34,12 +43,10 @@ export function flatten(input: string[][]): string[] {
 }
 
 export function stripText(input: string) {
-  let inputProcessed = input.toLowerCase().replace(/[^a-zA-Z ]/g, "");
-  // remove prepositions
-  inputProcessed = inputProcessed.replace(" or ", " ");
-  inputProcessed = inputProcessed.replace(" and ", " ");
-  inputProcessed = inputProcessed.replace(" of ", " ");
-  return inputProcessed.replace(" & ", " ").replace(/\s+/g, " ");
+  if (!input) {
+    return "";
+  }
+  return input.toLowerCase();
 }
 
 export function findInCombinations(textToFind: string, combinations: string[]) {
@@ -60,10 +67,29 @@ export function extractLocationTag(
   jobTitle: string,
   jobDescription: string
 ): string | null {
+  // exceptions
+  if (locationRequired) {
+    if (
+      locationRequired.toLowerCase().indexOf("worldwide") !== -1 ||
+      locationRequired.toLowerCase().indexOf("anywhere") !== -1 ||
+      locationRequired.toLowerCase().indexOf("timezone") !== -1 ||
+      locationRequired.toLowerCase().indexOf("time zone") !== -1
+    ) {
+      return null;
+    }
+    if (locationRequired.length >= 35) {
+      return null;
+    }
+  }
+
   const locationRequiredMatchers: LocationTagMatcher[] = [
     {
       locationTag: "north-america-and-europe-only",
       combinations: northAmericaAndEurope
+    },
+    {
+      locationTag: "us-and-europe-only",
+      combinations: usAndEurope
     },
     {
       locationTag: "americas-and-europe-only",

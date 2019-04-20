@@ -38,16 +38,9 @@ export class AuthenticJobs implements Bot {
     return null;
   }
 
-  extractLocationDetails(remoteDetails: string): LocationDetails {
-    throw new Error("Not implemented");
-  }
-
-  extractSalaryDetails(salary: string): SalaryDetails {
-    throw new Error("Not implemented");
-  }
-
   async shouldCapture(page: puppeteer.Page): Promise<boolean> {
-    return true;
+    const remoteIcon = await page.$(".ss-wifi");
+    return !!remoteIcon;
   }
 
   async getTitle(page: puppeteer.Page): Promise<string> {
@@ -93,14 +86,15 @@ export class AuthenticJobs implements Bot {
       const location = this.getLocationFromText(locationRaw);
       return {
         requiredLocation: location,
-        raw: locationRaw
+        raw: locationRaw,
+        locationTag: /.*,\s\w{2}/.test(location) ? "us-only" : null
       };
     }
     return {};
   }
 
   async getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails> {
-    throw new Error("Not implemented");
+    return {};
   }
 
   async getJobDrafts(

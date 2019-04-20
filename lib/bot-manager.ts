@@ -15,6 +15,7 @@ export interface LocationDetails {
   preferredLocation?: string;
   preferredTimeZone?: number;
   preferredTimeZoneTolerance?: number;
+  locationTag?: string;
 }
 
 export interface SalaryDetails {
@@ -248,11 +249,13 @@ export class BotManager {
         throw Error("COMPANY SHOULD NOT BE NULL");
       }
 
-      const locationTag = extractLocationTag(
-        locationDetails ? locationDetails.requiredLocation : "",
-        title,
-        description
-      );
+      const locationTag =
+        locationDetails.locationTag ||
+        extractLocationTag(
+          locationDetails ? locationDetails.requiredLocation : "",
+          title,
+          description
+        );
 
       const job: JobInput = {
         title,

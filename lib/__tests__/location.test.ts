@@ -1,7 +1,10 @@
 import {
+  conjunctions,
+  europe,
   extractLocationTag,
   findInCombinations,
   flatten,
+  northAmerica,
   stripText
 } from "../location";
 
@@ -73,6 +76,11 @@ describe("location", () => {
       expect(
         findInCombinations("america", ["europe is cool", "jesus"])
       ).toEqual(false);
+    });
+  });
+  describe("flatten", () => {
+    it("should work", () => {
+      expect(flatten([northAmerica, conjunctions, europe])).toEqual([]);
     });
   });
 });
