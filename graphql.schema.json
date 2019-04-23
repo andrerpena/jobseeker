@@ -38,7 +38,7 @@
                 "defaultValue": null
               },
               {
-                "name": "regionFree",
+                "name": "anywhere",
                 "description": "",
                 "type": { "kind": "SCALAR", "name": "Boolean", "ofType": null },
                 "defaultValue": null
@@ -77,6 +77,12 @@
                     }
                   }
                 },
+                "defaultValue": null
+              },
+              {
+                "name": "companyId",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
@@ -172,17 +178,15 @@
             "description": "",
             "args": [
               {
+                "name": "id",
+                "description": "",
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
+                "defaultValue": null
+              },
+              {
                 "name": "displayName",
                 "description": "",
-                "type": {
-                  "kind": "NON_NULL",
-                  "name": null,
-                  "ofType": {
-                    "kind": "SCALAR",
-                    "name": "String",
-                    "ofType": null
-                  }
-                },
+                "type": { "kind": "SCALAR", "name": "String", "ofType": null },
                 "defaultValue": null
               }
             ],
