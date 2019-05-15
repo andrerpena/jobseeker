@@ -11,5 +11,6 @@ Other useful links:
 - [Remoted GraphQL API](https://remoted.io/graphql)
 - [Remoted.io source code](https://github.com/remoted-io/remoted)
 
+JobSeeker is licensed as [AGPL](https://github.com/remoted-io/jobseeker/blob/master/LICENSE.md).
 
 Made with ❤ by [Andre Pena](https://twitter.com/andrerpena).
