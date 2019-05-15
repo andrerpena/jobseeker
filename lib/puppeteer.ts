@@ -5,13 +5,16 @@ export interface Queryable {
   $x(expression: string): Promise<ElementHandle[]>;
 }
 
-export async function getTextFromElement(page: Page, element: ElementHandle) {
+export async function getTextFromElement(
+  page: Page,
+  element: ElementHandle | null
+) {
   return page.evaluate(element => element.textContent, element);
 }
 
 export async function getAttributeFromElement(
   page: Page,
-  element: ElementHandle,
+  element: ElementHandle | null,
   attribute: string
 ) {
   return page.evaluate(
@@ -23,7 +26,7 @@ export async function getAttributeFromElement(
 
 export async function getInnerHtmlFromElement(
   page: Page,
-  element: ElementHandle
+  element: ElementHandle | null
 ) {
   return (await page.evaluate(element => element.innerHTML, element)).trim();
 }

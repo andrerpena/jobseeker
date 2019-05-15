@@ -19,15 +19,21 @@ export interface JobInput {
 
   locationRaw?: Maybe<string>;
 
-  locationRequired?: Maybe<string>;
+  locationPreferredContinentCodes?: Maybe<string[]>;
 
-  locationPreferred?: Maybe<string>;
+  locationPreferredCountryCodes?: Maybe<string[]>;
 
-  locationPreferredTimezone?: Maybe<number>;
+  locationPreferredTimezoneMin?: Maybe<number>;
 
-  locationPreferredTimezoneTolerance?: Maybe<number>;
+  locationPreferredTimezoneMax?: Maybe<number>;
 
-  locationTag?: Maybe<string>;
+  locationRequiredContinentCodes?: Maybe<string[]>;
+
+  locationRequiredCountryCodes?: Maybe<string[]>;
+
+  locationRequiredTimezoneMin?: Maybe<number>;
+
+  locationRequiredTimezoneMax?: Maybe<number>;
 
   salaryRaw?: Maybe<string>;
 

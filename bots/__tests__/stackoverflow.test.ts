@@ -3,9 +3,9 @@ import { Stackoverflow } from "../stackoverflow";
 const stackoverflow = new Stackoverflow();
 
 describe("Stackoverflow", () => {
-  describe("extractLocationDetails", () => {
+  describe("extractTimezoneDetails", () => {
     it("should work without tolerance", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails(
+      const remoteDetails = stackoverflow.extractTimezoneDetails(
         "(GMT+00:00) London"
       );
       expect(remoteDetails).toEqual({
@@ -15,7 +15,7 @@ describe("Stackoverflow", () => {
       });
     });
     it("should work when there is no tolerance specified", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails(
+      const remoteDetails = stackoverflow.extractTimezoneDetails(
         "(GMT+11:00) Eastern Time - Melbourne, Sydney"
       );
       expect(remoteDetails).toEqual({
@@ -25,7 +25,7 @@ describe("Stackoverflow", () => {
       });
     });
     it("should work with negative numbers", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails(
+      const remoteDetails = stackoverflow.extractTimezoneDetails(
         "(GMT-10:00) London"
       );
       expect(remoteDetails).toEqual({
@@ -35,7 +35,7 @@ describe("Stackoverflow", () => {
       });
     });
     it("when the input is not valid", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails("(GMT+00:00");
+      const remoteDetails = stackoverflow.extractTimezoneDetails("(GMT+00:00");
       expect(remoteDetails).toEqual({ raw: "(GMT+00:00" });
     });
   });

@@ -12,6 +12,10 @@ const JOB_REMOTE_URL_WITH_SALARY =
 const JOB_NO_REMOTE_URL =
   "https://stackoverflow.com/jobs/173949/big-data-engineer-ultra-tendency?so=i&pg=1&offset=-1";
 
+// Location details
+const JOB_WITH_CITY_AND_OFFSET =
+  "https://stackoverflow.com/jobs/254903/senior-full-stack-developer-firebase-node-mothership?so=i&pg=1&offset=0&r=true";
+
 const stackoverflow = new Stackoverflow();
 
 describe("Stackoverflow", () => {
@@ -86,25 +90,7 @@ describe("Stackoverflow", () => {
       expect(description).toMatchSnapshot();
     });
   });
-  describe("getLocationDetails", () => {
-    it("should work", async () => {
-      const page = await browser.newPage();
-      await page.goto(JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY);
-      const remoteDetails = await stackoverflow.getLocationDetails(page);
-      expect(remoteDetails).toEqual({
-        preferredLocation: "Berlin",
-        preferredTimeZone: 1,
-        preferredTimeZoneTolerance: 2,
-        raw: "(GMT+01:00) Berlin +/- 2 hours"
-      });
-    });
-    it("should work when there is no remote details", async () => {
-      const page = await browser.newPage();
-      await page.goto(JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS);
-      const remoteDetails = await stackoverflow.getLocationDetails(page);
-      expect(remoteDetails).toEqual({});
-    });
-  });
+
   describe("getSalaryDetails", () => {
     it("should work", async () => {
       const page = await browser.newPage();
@@ -115,8 +101,7 @@ describe("Stackoverflow", () => {
         equity: false,
         max: 60000,
         min: 35000,
-        raw:
-          "                                $35k - 60k                            "
+        raw: "$35k - 60k"
       });
     });
     it("should work when there is no salary", async () => {
@@ -133,9 +118,17 @@ describe("Stackoverflow", () => {
       const company = await stackoverflow.getCompany(page);
       expect(company).toEqual({
         displayName: "Bitfinex",
-        imageUrl: "https://i.stack.imgur.com/2iaF1.jpg",
-        url: "https://stackoverflow.com/jobs/companies/bitfinex"
+        imageUrl: "https://i.stack.imgur.com/2iaF1.jpg"
       });
+    });
+  });
+
+  describe("getLocationDetails", () => {
+    it("should work when there is a city and offset", async () => {
+      const page = await browser.newPage();
+      await page.goto(JOB_WITH_CITY_AND_OFFSET);
+      const remoteDetails = await stackoverflow.getLocationDetails(page);
+      expect(remoteDetails).toEqual({ raw: "(GMT+01:00) Berlin +/- 2 hours" });
     });
   });
 });

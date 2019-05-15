@@ -23,7 +23,7 @@ export function getTimeAgoFromString(text: string): TimeAgo | null {
   return null;
 }
 
-export function getTimeFromTimeAgo(timeAgo: TimeAgo, now: Date): Date {
+export function getTimeFromTimeAgo(timeAgo: TimeAgo | null, now: Date): Date {
   const copiedNow = new Date(now.getTime());
   if (!timeAgo || timeAgo.prefix) {
     return copiedNow;

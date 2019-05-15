@@ -74,22 +74,22 @@ export class AuthenticJobs implements Bot {
   }
 
   async getLocationDetails(page: puppeteer.Page): Promise<LocationDetails> {
-    let regionElement = await page.$("#location a");
-    if (!regionElement) {
-      regionElement = await page.$(".ss-location");
-    }
-    if (regionElement) {
-      let locationRaw = await getTextFromElement(page, regionElement);
-      if (locationRaw) {
-        locationRaw = locationRaw.trim().replace(/(\r\n|\n|\r)/gm, "");
-      }
-      const location = this.getLocationFromText(locationRaw);
-      return {
-        requiredLocation: location,
-        raw: locationRaw,
-        locationTag: /.*,\s\w{2}/.test(location) ? "us-only" : null
-      };
-    }
+    // let regionElement = await page.$("#location a");
+    // if (!regionElement) {
+    //   regionElement = await page.$(".ss-location");
+    // }
+    // if (regionElement) {
+    //   let locationRaw = await getTextFromElement(page, regionElement);
+    //   if (locationRaw) {
+    //     locationRaw = locationRaw.trim().replace(/(\r\n|\n|\r)/gm, "");
+    //   }
+    //   const location = this.getLocationFromText(locationRaw);
+    //   return {
+    //     requiredLocation: location,
+    //     raw: locationRaw,
+    //     locationTag: /.*,\s\w{2}/.test(location) ? "us-only" : null
+    //   };
+    // }
     return {};
   }
 
@@ -148,7 +148,7 @@ export class AuthenticJobs implements Bot {
 
   async getUtcPublishedAt(
     page: puppeteer.Page,
-    draft: JobDraft
+    draft: JobDraft | null
   ): Promise<Date | null> {
     const header = await page.$("#the_listing time");
     const dateString = await getAttributeFromElement(page, header, "datetime");

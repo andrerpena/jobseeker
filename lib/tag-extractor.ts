@@ -1,9 +1,9 @@
-import { tokenize } from "./tokenizer";
 import {
   decodeFromHex,
   encodeToHex,
   hasSpecialCharacters,
-  replaceAll
+  replaceAll,
+  tokenize
 } from "./string";
 
 // code to extract tags

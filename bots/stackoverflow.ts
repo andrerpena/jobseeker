@@ -3,7 +3,8 @@ import {
   CompanyDetails,
   JobDraft,
   LocationDetails,
-  SalaryDetails
+  SalaryDetails,
+  TimezoneDetails
 } from "../lib/bot-manager";
 import { BotLogger } from "../lib/logger";
 import * as puppeteer from "puppeteer";
@@ -22,31 +23,44 @@ export class Stackoverflow implements Bot {
     return `https://stackoverflow.com${relativeUrl}`;
   }
 
-  extractLocationDetails(remoteDetails: string): LocationDetails {
+  /**
+   * Will get a text like (GMT+02:00) Tallinn +/- 6 hours and return timezone
+   * details
+   * @param timezoneDetails
+   */
+  extractTimezoneDetails(timezoneDetails: string): TimezoneDetails {
     const result: LocationDetails = {
-      raw: remoteDetails
+      raw: timezoneDetails
     };
-    if (!remoteDetails) {
+    if (!timezoneDetails) {
       return result;
     }
-    const normalizedRemoteDetails = remoteDetails.replace(/(\r\n|\n|\r)/gm, "");
-    // match should be something like this ["(GMT+00:00) London", "+", "00", "00", "London"]
-    const match1 = normalizedRemoteDetails.match(
-      /(?:\(GMT([+,-])(\d+):(\d+)\))\s*(.*)/
+    const normalizedRemoteDetails = timezoneDetails.replace(
+      /(\r\n|\n|\r)/gm,
+      ""
     );
-    if (!match1) {
-      return result;
+    // match should be something like this ["(GMT+00:00) London", "+", "00", "00", "London"]
+
+    // Now, we have some options
+    // If the string is like:  "(GMT+01:00) Berlin +/- 4 hours"
+    // it will match this Regex: /\(GMT([+,-])(\d+):(\d+)\)\s+(.*)\s+((?:\+\/-) (\d+) hours)/
+    // If it is like: "(GMT+00:00) London" it will match another regex
+
+    // https://i.imgur.com/XoTN9ro.png
+    const remoteDetailsPattern1Match = normalizedRemoteDetails.match(
+      /\(GMT([+,-])(\d+):(\d+)\)\s+(.*)\s+((?:\+\/-) (\d+) hours)/
+    );
+
+    if (remoteDetailsPattern1Match) {
+      return {
+        preferredTimeZoneMin:
+          parseInt(remoteDetailsPattern1Match[1]) -
+          parseInt(remoteDetailsPattern1Match[6]),
+        preferredTimeZoneMax:
+          parseInt(remoteDetailsPattern1Match[1]) +
+          parseInt(remoteDetailsPattern1Match[6])
+      };
     }
-    result.preferredTimeZone = parseInt(`${match1[1]}${match1[2]}`);
-    const rawLocation = match1[4];
-    const match2 = rawLocation.match(/(.*)(?:\+\/-\s+(\d+)\s+hours)/);
-    if (!match2) {
-      result.preferredLocation = rawLocation;
-      return result;
-    }
-    result.preferredLocation = match2[1].trim();
-    result.preferredTimeZoneTolerance = parseInt(match2[2]);
-    return result;
   }
 
   extractSalaryDetails(salary: string): SalaryDetails {
@@ -143,17 +157,17 @@ export class Stackoverflow implements Bot {
     if (!remoteDetails) {
       throw new Error("locationDetails was not supposed to be null");
     }
-    const timeZoneTitle = await getElementWithExactText(
+    const preferredTimezoneTitle = await getElementWithExactText(
       remoteDetails,
       "Preferred Timezone:"
     );
-    if (timeZoneTitle) {
-      const timeZone = await getNextElement(page, timeZoneTitle);
+    if (preferredTimezoneTitle) {
+      const timeZone = await getNextElement(page, preferredTimezoneTitle);
       if (!timeZone) {
         throw new Error("timeZone was not supposed to be null");
       }
       const timeZoneText = await getTextFromElement(page, timeZone);
-      return this.extractLocationDetails(timeZoneText);
+      return this.extractTimezoneDetails(timeZoneText);
     }
     return result;
   }
