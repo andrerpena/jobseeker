@@ -1,7 +1,7 @@
-import { BotManager } from "./lib/bot-manager";
-import { Stackoverflow } from "./bots/stackoverflow";
-import { WeWorkRemotely } from "./bots/weworkremotely";
-import { AuthenticJobs } from "./bots/authenticJobs";
+import { BotManager } from "./src/bot-manager";
+import { Stackoverflow } from "./src/bots/stackoverflow";
+import { WeWorkRemotely } from "./src/bots/weworkremotely";
+import { AuthenticJobs } from "./src/bots/authenticJobs";
 
 const botManager = new BotManager();
 botManager.register(new AuthenticJobs());

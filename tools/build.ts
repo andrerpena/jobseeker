@@ -1,3 +1,3 @@
 import * as fs from "fs-extra";
 
-fs.copySync("./lib/graphql", "./dist/lib/graphql");
+fs.copySync("./src/graphql", "./dist/src/graphql");

@@ -1,11 +1,10 @@
 import { BotLogger, Logger } from "./logger";
 import colors from "colors";
 import puppeteer from "puppeteer";
-import { JobInput } from "../graphql-types";
+import { JobInput, LocationDetailsInput } from "../graphql-types";
 import { addCompany, addJob, getCompany, getJob } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
 import { launchPuppeteer } from "./puppeteer";
-import { extractLocation } from "./location";
 
 const RATE_LIMIT = 30;
 
@@ -14,18 +13,6 @@ export interface TimezoneDetails {
   preferredTimeZoneMax?: number;
   requiredCountryCodes?: string;
   requiredTimeZoneMin?: number;
-}
-
-export interface LocationDetails extends TimezoneDetails {
-  raw?: string;
-  preferredContinentCodes?: string;
-  preferredCountryCodes?: string;
-  preferredTimeZoneMin?: number;
-  preferredTimeZoneMax?: number;
-  requiredContinentCodes?: string;
-  requiredCountryCodes?: string;
-  requiredTimeZoneMin?: number;
-  requiredTimeZoneMax?: number;
 }
 
 export interface SalaryDetails {
@@ -74,7 +61,7 @@ export interface Bot {
   getLocationDetails(
     page: puppeteer.Page,
     draft: JobDraft | null
-  ): Promise<LocationDetails>;
+  ): Promise<LocationDetailsInput>;
 
   getSalaryDetails(
     page: puppeteer.Page,
@@ -211,7 +198,7 @@ export class BotManager {
         return;
       }
 
-      const locationDetails = await this.wrapCall<LocationDetails>(
+      const locationDetails = await this.wrapCall<LocationDetailsInput>(
         () => bot.getLocationDetails(page, draft),
         {},
         "getLocationDetails",
@@ -275,8 +262,7 @@ export class BotManager {
           ? publishedAt.toISOString()
           : new Date().toISOString(),
         url: draft.link,
-
-        locationRaw: locationDetails.raw,
+        locationDetails: locationDetails,
         salaryRaw: salaryDetails.raw,
         salaryExact: salaryDetails.exact,
         salaryMin: salaryDetails.min,

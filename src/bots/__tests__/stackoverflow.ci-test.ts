@@ -1,10 +1,9 @@
-import { Stackoverflow } from "../bots/stackoverflow";
+import { Stackoverflow } from "../stackoverflow";
 import puppeteer from "puppeteer";
-import { ConsoleBotLogger } from "../lib/bot-manager";
-import { launchPuppeteer } from "../lib/puppeteer";
+import { ConsoleBotLogger } from "../../bot-manager";
+import { launchPuppeteer } from "../../puppeteer";
+import { LocationDetailsInput } from "../../../graphql-types";
 
-const JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS =
-  "https://stackoverflow.com/jobs/161106/backend-and-devops-kubernetes-docker-terraform-finetune-learning?so=i&pg=1&offset=-1&r=true";
 const JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY =
   "https://stackoverflow.com/jobs/237999/backend-engineer-routing-navigation-komoot?so=i&pg=1&offset=0&r=true";
 const JOB_REMOTE_URL_WITH_SALARY =
@@ -124,11 +123,29 @@ describe("Stackoverflow", () => {
   });
 
   describe("getLocationDetails", () => {
-    it("should work when there is a city and offset", async () => {
+    it("should work when there is a city and offset min and max", async () => {
       const page = await browser.newPage();
       await page.goto(JOB_WITH_CITY_AND_OFFSET);
+      // location should be: (GMT+02:00) Tallinn +/- 6 hours
       const remoteDetails = await stackoverflow.getLocationDetails(page);
-      expect(remoteDetails).toEqual({ raw: "(GMT+01:00) Berlin +/- 2 hours" });
+      expect(remoteDetails).toEqual({
+        description: "(GMT+02:00) Tallinn +/- 6 hours",
+        timeZoneMax: 8,
+        timeZoneMin: -4
+      } as LocationDetailsInput);
+    });
+    it("should work when there is a city", async () => {
+      const page = await browser.newPage();
+      await page.goto(
+        "https://stackoverflow.com/jobs/228554/front-end-developer-javascript-angular-third-light?so=i&pg=1&offset=1&r=true"
+      );
+      // location should be: (GMT+00:00) London
+      const remoteDetails = await stackoverflow.getLocationDetails(page);
+      expect(remoteDetails).toEqual({
+        description: "(GMT+00:00) London ",
+        timeZoneMax: 0,
+        timeZoneMin: 0
+      } as LocationDetailsInput);
     });
   });
 });

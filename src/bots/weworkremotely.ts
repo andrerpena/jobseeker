@@ -1,19 +1,15 @@
-import {
-  Bot,
-  CompanyDetails,
-  JobDraft,
-  LocationDetails,
-  SalaryDetails
-} from "../lib/bot-manager";
+import { Bot, CompanyDetails, JobDraft, SalaryDetails } from "../bot-manager";
 import * as puppeteer from "puppeteer";
-import { Logger } from "../lib/logger";
+import { Logger } from "../logger";
 import {
   getAttributeFromElement,
   getInnerHtmlFromElement,
   getTextFromElement
-} from "../lib/puppeteer";
-import { getMarkdownFromHtml, removeMarkdown } from "../lib/markdown";
-import { extractTags } from "../lib/tag-extractor";
+} from "../puppeteer";
+import { getMarkdownFromHtml, removeMarkdown } from "../markdown";
+import { extractTags } from "../tag-extractor";
+import { LocationDetailsInput } from "../../graphql-types";
+import { extractLocation } from "../location";
 
 export class WeWorkRemotely implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
@@ -96,16 +92,17 @@ export class WeWorkRemotely implements Bot {
   async getLocationDetails(
     page: puppeteer.Page,
     draft: JobDraft | null
-  ): Promise<LocationDetails> {
-    // const regionElement = await page.$(".listing-header-container .region");
-    // if (regionElement) {
-    //   const locationRaw = await getTextFromElement(page, regionElement);
-    //   const location = this.getLocationFromText(locationRaw);
-    //   return {
-    //     requiredLocation: location,
-    //     raw: locationRaw
-    //   };
-    // }
+  ): Promise<LocationDetailsInput> {
+    const regionElement = await page.$(".listing-header-container .region");
+    if (regionElement) {
+      const locationRaw = await getTextFromElement(page, regionElement);
+      const location = this.getLocationFromText(locationRaw);
+      const extractedLocation = location ? extractLocation(location) : {};
+      return {
+        description: locationRaw,
+        ...(extractedLocation ? extractedLocation : {})
+      };
+    }
     return {};
   }
 

@@ -2,11 +2,10 @@ import {
   Bot,
   CompanyDetails,
   JobDraft,
-  LocationDetails,
   SalaryDetails,
   TimezoneDetails
-} from "../lib/bot-manager";
-import { BotLogger } from "../lib/logger";
+} from "../bot-manager";
+import { BotLogger } from "../logger";
 import * as puppeteer from "puppeteer";
 import {
   getAttributeFromElement,
@@ -14,9 +13,10 @@ import {
   getInnerHtmlFromElement,
   getNextElement,
   getTextFromElement
-} from "../lib/puppeteer";
-import { getTimeAgoFromString, getTimeFromTimeAgo } from "../lib/date";
-import { removeQueryString } from "../lib/url/url";
+} from "../puppeteer";
+import { getTimeAgoFromString, getTimeFromTimeAgo } from "../date";
+import { removeQueryString } from "../url/url";
+import { LocationDetailsInput } from "../../graphql-types";
 
 export class Stackoverflow implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
@@ -26,19 +26,19 @@ export class Stackoverflow implements Bot {
   /**
    * Will get a text like (GMT+02:00) Tallinn +/- 6 hours and return timezone
    * details
-   * @param timezoneDetails
+   * @param locationText
    */
-  extractTimezoneDetails(timezoneDetails: string): TimezoneDetails {
-    const result: LocationDetails = {
-      raw: timezoneDetails
-    };
-    if (!timezoneDetails) {
-      return result;
+  static extractLocationDetailsFromText(
+    locationText: string
+  ): LocationDetailsInput {
+    const defaultLocation = {
+      description: locationText
+    } as LocationDetailsInput;
+
+    if (!locationText) {
+      return {};
     }
-    const normalizedRemoteDetails = timezoneDetails.replace(
-      /(\r\n|\n|\r)/gm,
-      ""
-    );
+    const normalizedRemoteDetails = locationText.replace(/(\r\n|\n|\r)/gm, "");
     // match should be something like this ["(GMT+00:00) London", "+", "00", "00", "London"]
 
     // Now, we have some options
@@ -52,18 +52,30 @@ export class Stackoverflow implements Bot {
     );
 
     if (remoteDetailsPattern1Match) {
+      const timeZone = parseInt(remoteDetailsPattern1Match[2]);
       return {
-        preferredTimeZoneMin:
-          parseInt(remoteDetailsPattern1Match[1]) -
-          parseInt(remoteDetailsPattern1Match[6]),
-        preferredTimeZoneMax:
-          parseInt(remoteDetailsPattern1Match[1]) +
-          parseInt(remoteDetailsPattern1Match[6])
+        ...defaultLocation,
+        timeZoneMin: timeZone - parseInt(remoteDetailsPattern1Match[6]),
+        timeZoneMax: timeZone + parseInt(remoteDetailsPattern1Match[6])
       };
     }
+
+    const remoteDetailsPattern2Match = normalizedRemoteDetails.match(
+      /\(GMT([+,-])(\d+):(\d+)\)\s+(.*)/
+    );
+
+    if (remoteDetailsPattern2Match) {
+      const timeZone = parseInt(remoteDetailsPattern2Match[2]);
+      return {
+        ...defaultLocation,
+        timeZoneMin: timeZone,
+        timeZoneMax: timeZone
+      };
+    }
+    return defaultLocation;
   }
 
-  extractSalaryDetails(salary: string): SalaryDetails {
+  static extractSalaryDetails(salary: string): SalaryDetails {
     const result: SalaryDetails = {
       raw: salary
     };
@@ -139,8 +151,10 @@ export class Stackoverflow implements Bot {
     return html;
   }
 
-  async getLocationDetails(page: puppeteer.Page): Promise<LocationDetails> {
-    const result: LocationDetails = {};
+  async getLocationDetails(
+    page: puppeteer.Page
+  ): Promise<LocationDetailsInput> {
+    const result: LocationDetailsInput = {};
     const overview = await page.$("#overview-items");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
@@ -166,8 +180,8 @@ export class Stackoverflow implements Bot {
       if (!timeZone) {
         throw new Error("timeZone was not supposed to be null");
       }
-      const timeZoneText = await getTextFromElement(page, timeZone);
-      return this.extractTimezoneDetails(timeZoneText);
+      const locationText = await getTextFromElement(page, timeZone);
+      return Stackoverflow.extractLocationDetailsFromText(locationText);
     }
     return result;
   }
@@ -183,7 +197,7 @@ export class Stackoverflow implements Bot {
       return result;
     }
     const salaryText = await getTextFromElement(page, salary);
-    return this.extractSalaryDetails(salaryText);
+    return Stackoverflow.extractSalaryDetails(salaryText);
   }
 
   async getJobDrafts(

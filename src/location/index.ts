@@ -44,12 +44,11 @@ export interface LocationTagMatcher {
 }
 
 export interface ExtractedLocation {
-  regions?: Region[];
+  acceptedRegions?: Region[];
   /**
-   * ISO 3166-2 countries
+   * ISO 3166-2 acceptedCountries
    */
-  countries?: string[];
-  worldwide?: boolean;
+  acceptedCountries?: string[];
 }
 
 // general
@@ -82,80 +81,80 @@ const oceania = ["oceania"];
 const locationRequiredMatchers: LocationTagMatcher[] = [
   {
     location: {
-      regions: ["North America", "Europe"]
+      acceptedRegions: ["North America", "Europe"]
     },
     combinations: northAmericaAndEurope
   },
   {
     location: {
-      regions: ["Europe"],
-      countries: ["US"]
+      acceptedRegions: ["Europe"],
+      acceptedCountries: ["US"]
     },
     combinations: usAndEurope
   },
   {
     location: {
-      regions: ["Americas", "Europe"]
+      acceptedRegions: ["Americas", "Europe"]
     },
     combinations: americasAndEurope
   },
   {
     location: {
-      regions: ["North America"]
+      acceptedRegions: ["North America"]
     },
     combinations: northAmerica
   },
   {
     location: {
-      regions: ["Americas"]
+      acceptedRegions: ["Americas"]
     },
     combinations: americas
   },
   {
     location: {
-      countries: ["US"]
+      acceptedCountries: ["US"]
     },
     combinations: us
   },
   {
     location: {
-      regions: ["Europe"]
+      acceptedRegions: ["Europe"]
     },
     combinations: europe
   },
   {
     location: {
-      countries: ["GB"]
+      acceptedCountries: ["GB"]
     },
     combinations: uk
   },
   {
     location: {
-      regions: ["Europe", "Middle East", "Africa"]
+      acceptedRegions: ["Europe", "Middle East", "Africa"]
     },
     combinations: emea
   },
   {
     location: {
-      regions: ["Northern Africa", "Middle East"]
+      acceptedRegions: ["Northern Africa", "Middle East"]
     },
     combinations: mena
   },
   {
     location: {
-      regions: ["Africa"]
+      acceptedRegions: ["Africa"]
     },
     combinations: africa
   },
   {
     location: {
-      regions: ["Oceania"]
+      acceptedRegions: ["Oceania"]
     },
     combinations: oceania
   },
   {
     location: {
-      countries: ["AU"]
+      acceptedCountries: ["AU"]
     },
     combinations: australia
   }
@@ -172,9 +171,7 @@ export function extractLocation(text: string): ExtractedLocation | null {
     text.toLowerCase().indexOf("worldwide") !== -1 ||
     text.toLowerCase().indexOf("anywhere") !== -1
   ) {
-    return {
-      worldwide: true
-    };
+    return null;
   }
 
   // process location required

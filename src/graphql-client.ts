@@ -18,19 +18,19 @@ config();
 const GRAPHQL_AUTH_TOKEN = process.env.GRAPHQL_AUTH_TOKEN;
 
 const getJobQuery = graphql.parse(
-  fs.readFileSync(path.join(__dirname, "/graphql/get-job.graphql")).toString()
+  fs.readFileSync(path.join(__dirname, "/queries/get-job.graphql")).toString()
 );
 const addCompanyMutation = graphql.parse(
   fs
-    .readFileSync(path.join(__dirname, "/graphql/add-company.graphql"))
+    .readFileSync(path.join(__dirname, "/queries/add-company.graphql"))
     .toString()
 );
 const addJobMutation = graphql.parse(
-  fs.readFileSync(path.join(__dirname, "/graphql/add-job.graphql")).toString()
+  fs.readFileSync(path.join(__dirname, "/queries/add-job.graphql")).toString()
 );
 const getCompanyQuery = graphql.parse(
   fs
-    .readFileSync(path.join(__dirname, "/graphql/get-company.graphql"))
+    .readFileSync(path.join(__dirname, "/queries/get-company.graphql"))
     .toString()
 );
 
