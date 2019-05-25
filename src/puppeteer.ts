@@ -46,6 +46,16 @@ export async function getFirstChild(page: Page, element: ElementHandle) {
   ) as Promise<ElementHandle>;
 }
 
+export async function getLastChild(page: Page, element: ElementHandle) {
+  return page.evaluateHandle(
+    element =>
+      element.children && element.children.length
+        ? element.children[element.children.length - 1]
+        : null,
+    element
+  ) as Promise<ElementHandle>;
+}
+
 export async function getElementWithExactText(
   frameBase: Queryable | ElementHandle | Page,
   text: string
@@ -190,7 +200,41 @@ export class FluentPuppeteerNode {
         const error: FluentPuppeteerNodeError | undefined = newElement
           ? undefined
           : {
-              message: `Could not find next element`,
+              message: `Could not find fist child`,
+              step: state.step
+            };
+
+        return new FluentPuppeteerState(
+          state.page,
+          newElement,
+          state.step + 1,
+          error
+        );
+      }
+    );
+    return this;
+  }
+
+  $lastChild(): FluentPuppeteerNode {
+    this.pendingState = this.pendingState.then(
+      async (state: FluentPuppeteerState) => {
+        if (state.error) {
+          return state;
+        }
+        if (!state.currentElement === null) {
+          return new FluentPuppeteerState(state.page, null, state.step + 1, {
+            message: `Cannot $lastChild when there is no element in the state`,
+            step: state.step
+          });
+        }
+        const newElement = await getLastChild(
+          state.page,
+          state.currentElement as ElementHandle
+        );
+        const error: FluentPuppeteerNodeError | undefined = newElement
+          ? undefined
+          : {
+              message: `Could not find last child`,
               step: state.step
             };
 

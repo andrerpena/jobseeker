@@ -19,14 +19,6 @@ export class WeWorkRemotely implements Bot {
     return `https://weworkremotely.com${relativeUrl}`;
   }
 
-  getLocationFromText(text: string) {
-    const match = text.match(/Must be located:(.*)/);
-    if (match) {
-      return match[1].trim();
-    }
-    return null;
-  }
-
   async getCompany(
     page: puppeteer.Page,
     draft: JobDraft | null
@@ -103,30 +95,22 @@ export class WeWorkRemotely implements Bot {
     const description = getMarkdownFromHtml(
       await this.getDescriptionHtml(page, draft)
     );
-    const result: LocationDetailsInput =
+
+    const resultFromText: LocationDetailsInput =
       extractLocation(description, true) || {};
 
-    const regionElement = await page.$(".listing-header-container .region");
-    if (regionElement) {
-      const locationRaw = await getTextFromElement(page, regionElement);
-      const location = this.getLocationFromText(locationRaw);
+    // On we-work-remotely, the locations are on the last tags, when they exist,
+    const lastTagText = (await query(page)
+      .$(".listing-header-container")
+      .$lastChild()
+      .getInnerHtml()).value;
 
-      const foundCountry = countries.find(c => c.displayName === location);
+    const resultFromTag = extractLocation(lastTagText || "", false);
 
-      const extractedLocation = location
-        ? extractLocation(location, false)
-        : {};
-      return {
-        ...result,
-        description: locationRaw,
-        ...(extractedLocation
-          ? extractedLocation
-          : foundCountry
-          ? { acceptedCountries: [foundCountry.iso31662Name] }
-          : undefined)
-      };
-    }
-    return result;
+    return {
+      ...resultFromText,
+      ...resultFromTag
+    };
   }
 
   getName(): string {

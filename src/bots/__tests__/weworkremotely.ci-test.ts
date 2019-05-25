@@ -97,8 +97,7 @@ describe("WeWorkRemotely", () => {
       );
 
       expect(companyDetails).toEqual({
-        acceptedCountries: ["US"],
-        description: "Must be located: USA"
+        acceptedCountries: ["US"]
       } as LocationDetailsInput);
     });
     // skipping because I can't find one specific to north america now
