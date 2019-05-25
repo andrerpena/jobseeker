@@ -2,14 +2,17 @@ import { Bot, CompanyDetails, JobDraft, SalaryDetails } from "../bot-manager";
 import * as puppeteer from "puppeteer";
 import { Logger } from "../logger";
 import {
+  FluentPuppeteerNode,
   getAttributeFromElement,
   getInnerHtmlFromElement,
-  getTextFromElement
+  getTextFromElement,
+  query
 } from "../puppeteer";
 import { getMarkdownFromHtml, removeMarkdown } from "../markdown";
 import { extractTags } from "../tag-extractor";
 import { LocationDetailsInput } from "../../graphql-types";
 import { extractLocation } from "../location";
+import { countries } from "../location/countries";
 
 export class WeWorkRemotely implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
@@ -28,22 +31,26 @@ export class WeWorkRemotely implements Bot {
     page: puppeteer.Page,
     draft: JobDraft | null
   ): Promise<CompanyDetails> {
-    const companyNameElement = await page.$(
-      ".listing-header-container .company"
-    );
-    const companyName = await getTextFromElement(page, companyNameElement);
+    const company = await query(page)
+      .$(".company-card")
+      .$("h2 a")
+      .getInnerHtml();
+    const imageUrl = await query(page)
+      .$(".company-card")
+      .$(".listing-logo img")
+      .getAttribute("src");
 
-    const companyLogoElement = await page.$(
-      ".listing-header .listing-logo img"
-    );
+    if (company.error) {
+      throw company.error;
+    }
 
-    const companyLogoUrl = companyLogoElement
-      ? await getAttributeFromElement(page, companyLogoElement, "src")
-      : "";
+    if (imageUrl.error) {
+      throw imageUrl.error;
+    }
 
     return {
-      displayName: companyName,
-      imageUrl: companyLogoUrl
+      displayName: company.value || "",
+      imageUrl: imageUrl.value || ""
     };
   }
 
@@ -93,17 +100,33 @@ export class WeWorkRemotely implements Bot {
     page: puppeteer.Page,
     draft: JobDraft | null
   ): Promise<LocationDetailsInput> {
+    const description = getMarkdownFromHtml(
+      await this.getDescriptionHtml(page, draft)
+    );
+    const result: LocationDetailsInput =
+      extractLocation(description, true) || {};
+
     const regionElement = await page.$(".listing-header-container .region");
     if (regionElement) {
       const locationRaw = await getTextFromElement(page, regionElement);
       const location = this.getLocationFromText(locationRaw);
-      const extractedLocation = location ? extractLocation(location) : {};
+
+      const foundCountry = countries.find(c => c.displayName === location);
+
+      const extractedLocation = location
+        ? extractLocation(location, false)
+        : {};
       return {
+        ...result,
         description: locationRaw,
-        ...(extractedLocation ? extractedLocation : {})
+        ...(extractedLocation
+          ? extractedLocation
+          : foundCountry
+          ? { acceptedCountries: [foundCountry.iso31662Name] }
+          : undefined)
       };
     }
-    return {};
+    return result;
   }
 
   getName(): string {

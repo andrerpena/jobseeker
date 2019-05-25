@@ -72,6 +72,12 @@ export class AuthenticJobs implements Bot {
   async getLocationDetails(
     page: puppeteer.Page
   ): Promise<LocationDetailsInput> {
+    const description = getMarkdownFromHtml(
+      await this.getDescriptionHtml(page)
+    );
+    const result: LocationDetailsInput =
+      extractLocation(description, true) || {};
+
     let regionElement = await page.$("#location a");
     if (!regionElement) {
       regionElement = await page.$(".ss-location");
@@ -82,15 +88,17 @@ export class AuthenticJobs implements Bot {
         locationRaw = locationRaw.trim().replace(/(\r\n|\n|\r)/gm, "");
       }
       const location = this.getLocationFromText(locationRaw);
-      const extractedLocation = location ? extractLocation(location) : {};
+      const extractedLocation = location
+        ? extractLocation(location, false)
+        : {};
 
       return {
-        // requiredLocation: location,
+        ...result,
         description: locationRaw,
         ...(extractedLocation || {})
       };
     }
-    return {};
+    return result;
   }
 
   async getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails> {

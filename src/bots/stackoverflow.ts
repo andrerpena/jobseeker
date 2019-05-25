@@ -17,6 +17,8 @@ import {
 import { getTimeAgoFromString, getTimeFromTimeAgo } from "../date";
 import { removeQueryString } from "../url/url";
 import { LocationDetailsInput } from "../../graphql-types";
+import { getMarkdownFromHtml } from "../markdown";
+import { extractLocation } from "../location";
 
 export class Stackoverflow implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
@@ -52,7 +54,11 @@ export class Stackoverflow implements Bot {
     );
 
     if (remoteDetailsPattern1Match) {
-      const timeZone = parseInt(remoteDetailsPattern1Match[2]);
+      const sign = remoteDetailsPattern1Match[1];
+      let timeZone = parseInt(remoteDetailsPattern1Match[2]);
+      if (sign === "-") {
+        timeZone = -timeZone;
+      }
       return {
         ...defaultLocation,
         timeZoneMin: timeZone - parseInt(remoteDetailsPattern1Match[6]),
@@ -154,7 +160,11 @@ export class Stackoverflow implements Bot {
   async getLocationDetails(
     page: puppeteer.Page
   ): Promise<LocationDetailsInput> {
-    const result: LocationDetailsInput = {};
+    const description = getMarkdownFromHtml(
+      await this.getDescriptionHtml(page)
+    );
+    const result: LocationDetailsInput =
+      extractLocation(description, true) || {};
     const overview = await page.$("#overview-items");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
@@ -181,7 +191,10 @@ export class Stackoverflow implements Bot {
         throw new Error("timeZone was not supposed to be null");
       }
       const locationText = await getTextFromElement(page, timeZone);
-      return Stackoverflow.extractLocationDetailsFromText(locationText);
+      return {
+        ...(Stackoverflow.extractLocationDetailsFromText(locationText) || {}),
+        ...result
+      };
     }
     return result;
   }

@@ -3,34 +3,23 @@ import { findInArray } from "../../string";
 
 describe("index.ts", () => {
   describe("extractLocation", () => {
-    it("should not have the tag when there is no location tag", () => {
-      const locationTag = extractLocation("brazil only please");
+    it("should return US if when prefix is not required and US is on the text", () => {
+      const locationTag = extractLocation(
+        "you have to be in the us please",
+        false
+      );
+      expect(locationTag).toEqual({ acceptedCountries: ["US"] });
+    });
+    it("should return null if when prefix is required but not passed", () => {
+      const locationTag = extractLocation(
+        "you have to be in the us please",
+        true
+      );
       expect(locationTag).toEqual(null);
     });
-    it("should get us-only tags from title", () => {
-      const locationTag = extractLocation("us residents please");
-      expect(locationTag).toEqual({
-        countries: ["US"]
-      });
-    });
-    it("should get us-only tags from description", () => {
-      const locationTag = extractLocation(
-        "This position can be remote, but US based candidates only"
-      );
-      expect(locationTag).toEqual({ countries: ["US"] });
-    });
-    it("should work with suffixes", () => {
-      const locationTag = extractLocation("this is fooor uk based people");
-      expect(locationTag).toEqual({ countries: ["GB"] });
-    });
-    it("should work with location required", () => {
-      const locationTag = extractLocation("hello north america is amazing");
-      expect(locationTag).toEqual({ regions: ["North America"] });
-    });
-
-    it("should work with north america as us and canada", () => {
-      const locationTag = extractLocation("north america");
-      expect(locationTag).toEqual({ regions: ["North America"] });
+    it("should return US when prefix is required and passed", () => {
+      const locationTag = extractLocation("location: us please", true);
+      expect(locationTag).toEqual({ acceptedCountries: ["US"] });
     });
   });
   describe("findInArray", () => {

@@ -90,6 +90,7 @@ describe("AuthenticJobs", () => {
       );
       const companyDetails = await authenticJobs.getLocationDetails(page);
       expect(companyDetails).toEqual({
+        acceptedCountries: ["US"],
         acceptedRegions: ["North America"],
         description: "East Coast - North America"
       });

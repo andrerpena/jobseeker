@@ -74,11 +74,14 @@ describe("WeWorkRemotely", () => {
   describe("getCompany", () => {
     it("should work", async () => {
       const page = await browser.newPage();
-      await page.goto(jobUrl);
+      await page.goto(
+        "https://weworkremotely.com/remote-jobs/helpdocs-full-stack-developer"
+      );
       const companyDetails = await weWorkRemotely.getCompany(page, null);
       expect(companyDetails).toEqual({
-        displayName: expect.any(String),
-        imageUrl: expect.any(String)
+        displayName: "HelpDocs",
+        imageUrl:
+          "https://we-work-remotely.imgix.net/logos/0015/6620/logo.gif?ixlib=rails-2.1.3&w=50&h=50&dpr=2&fit=fill&auto=compress"
       });
     });
   });

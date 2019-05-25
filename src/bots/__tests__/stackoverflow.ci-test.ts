@@ -125,7 +125,9 @@ describe("Stackoverflow", () => {
   describe("getLocationDetails", () => {
     it("should work when there is a city and offset min and max", async () => {
       const page = await browser.newPage();
-      await page.goto(JOB_WITH_CITY_AND_OFFSET);
+      await page.goto(
+        "https://stackoverflow.com/jobs/254903/senior-full-stack-developer-firebase-node-mothership?so=i&pg=1&offset=0&r=true"
+      );
       // location should be: (GMT+02:00) Tallinn +/- 6 hours
       const remoteDetails = await stackoverflow.getLocationDetails(page);
       expect(remoteDetails).toEqual({

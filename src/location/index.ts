@@ -52,7 +52,7 @@ export interface ExtractedLocation {
 }
 
 // general
-const prefixes = ["index.ts", "location:"];
+const prefixes = ["only", "location:"];
 const suffixes = ["residents", "candidates", "based"];
 export const conjunctions = ["and", "or", "&"];
 
@@ -163,7 +163,10 @@ const locationRequiredMatchers: LocationTagMatcher[] = [
 /**
  * Inspects the given text and returns ExtractedLocation
  */
-export function extractLocation(text: string): ExtractedLocation | null {
+export function extractLocation(
+  text: string,
+  requireSuffixOrPrefix: boolean
+): ExtractedLocation | null {
   if (!text) return {};
 
   // worldwide
@@ -174,17 +177,8 @@ export function extractLocation(text: string): ExtractedLocation | null {
     return null;
   }
 
-  // process location required
   for (let matcher of locationRequiredMatchers) {
-    // process location required
-    if (findInArray(text, matcher.combinations)) {
-      return matcher.location;
-    }
-    // process title and body
-    if (
-      findInArray(text, flatten([prefixes, matcher.combinations])) ||
-      findInArray(text, flatten([matcher.combinations, suffixes]))
-    ) {
+    if (!requireSuffixOrPrefix && findInArray(text, matcher.combinations)) {
       return matcher.location;
     }
     if (

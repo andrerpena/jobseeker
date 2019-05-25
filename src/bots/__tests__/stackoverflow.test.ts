@@ -1,7 +1,5 @@
 import { Stackoverflow } from "../stackoverflow";
 
-const stackoverflow = new Stackoverflow();
-
 describe("Stackoverflow", () => {
   describe("extractLocationDetailsFromText", () => {
     it("should work without tolerance", () => {
@@ -32,6 +30,17 @@ describe("Stackoverflow", () => {
         preferredLocation: "London",
         preferredTimeZone: -10,
         raw: "(GMT-10:00) London"
+      });
+    });
+    it("should work with negative numbers when there are offsets", () => {
+      // (GMT-08:00) Pacific Time +/- 6 hours
+      const remoteDetails = Stackoverflow.extractLocationDetailsFromText(
+        "(GMT-08:00) Pacific Time +/- 6 hours"
+      );
+      expect(remoteDetails).toEqual({
+        description: "(GMT-08:00) Pacific Time +/- 6 hours",
+        timeZoneMax: -2,
+        timeZoneMin: -14
       });
     });
     it("when the input is not valid", () => {
