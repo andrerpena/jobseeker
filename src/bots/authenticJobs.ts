@@ -1,19 +1,15 @@
-import {
-  Bot,
-  CompanyDetails,
-  JobDraft,
-  LocationDetails,
-  SalaryDetails
-} from "../lib/bot-manager";
-import { BotLogger } from "../lib/logger";
+import { Bot, CompanyDetails, JobDraft, SalaryDetails } from "../bot-manager";
+import { BotLogger } from "../logger";
 import * as puppeteer from "puppeteer";
 import {
   getAttributeFromElement,
   getInnerHtmlFromElement,
   getTextFromElement
-} from "../lib/puppeteer";
-import { getMarkdownFromHtml, removeMarkdown } from "../lib/markdown";
-import { extractTags } from "../lib/tag-extractor";
+} from "../puppeteer";
+import { getMarkdownFromHtml, removeMarkdown } from "../markdown";
+import { extractTags } from "../tag-extractor";
+import { LocationDetailsInput } from "../../graphql-types";
+import { extractLocation } from "../location";
 
 export class AuthenticJobs implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
@@ -73,7 +69,15 @@ export class AuthenticJobs implements Bot {
     return html;
   }
 
-  async getLocationDetails(page: puppeteer.Page): Promise<LocationDetails> {
+  async getLocationDetails(
+    page: puppeteer.Page
+  ): Promise<LocationDetailsInput> {
+    const description = getMarkdownFromHtml(
+      await this.getDescriptionHtml(page)
+    );
+    const result: LocationDetailsInput =
+      extractLocation(description, true) || {};
+
     let regionElement = await page.$("#location a");
     if (!regionElement) {
       regionElement = await page.$(".ss-location");
@@ -84,13 +88,17 @@ export class AuthenticJobs implements Bot {
         locationRaw = locationRaw.trim().replace(/(\r\n|\n|\r)/gm, "");
       }
       const location = this.getLocationFromText(locationRaw);
+      const extractedLocation = location
+        ? extractLocation(location, false)
+        : {};
+
       return {
-        requiredLocation: location,
-        raw: locationRaw,
-        locationTag: /.*,\s\w{2}/.test(location) ? "us-only" : null
+        ...result,
+        description: locationRaw,
+        ...(extractedLocation || {})
       };
     }
-    return {};
+    return result;
   }
 
   async getSalaryDetails(page: puppeteer.Page): Promise<SalaryDetails> {
@@ -148,7 +156,7 @@ export class AuthenticJobs implements Bot {
 
   async getUtcPublishedAt(
     page: puppeteer.Page,
-    draft: JobDraft
+    draft: JobDraft | null
   ): Promise<Date | null> {
     const header = await page.$("#the_listing time");
     const dateString = await getAttributeFromElement(page, header, "datetime");

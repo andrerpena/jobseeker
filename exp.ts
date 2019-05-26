@@ -4,7 +4,7 @@ import {
   getNextElement,
   getTextFromElement,
   launchPuppeteer
-} from "./lib/puppeteer";
+} from "./src/puppeteer";
 
 const html = `
 <html>

@@ -1,16 +1,19 @@
-import { Stackoverflow } from "../bots/stackoverflow";
+import { Stackoverflow } from "../stackoverflow";
 import puppeteer from "puppeteer";
-import { ConsoleBotLogger } from "../lib/bot-manager";
-import { launchPuppeteer } from "../lib/puppeteer";
+import { ConsoleBotLogger } from "../../bot-manager";
+import { launchPuppeteer } from "../../puppeteer";
+import { LocationDetailsInput } from "../../../graphql-types";
 
-const JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS =
-  "https://stackoverflow.com/jobs/161106/backend-and-devops-kubernetes-docker-terraform-finetune-learning?so=i&pg=1&offset=-1&r=true";
 const JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY =
   "https://stackoverflow.com/jobs/237999/backend-engineer-routing-navigation-komoot?so=i&pg=1&offset=0&r=true";
 const JOB_REMOTE_URL_WITH_SALARY =
   "https://stackoverflow.com/jobs/205657/qa-engineer-remote-bitfinex";
 const JOB_NO_REMOTE_URL =
   "https://stackoverflow.com/jobs/173949/big-data-engineer-ultra-tendency?so=i&pg=1&offset=-1";
+
+// Location details
+const JOB_WITH_CITY_AND_OFFSET =
+  "https://stackoverflow.com/jobs/254903/senior-full-stack-developer-firebase-node-mothership?so=i&pg=1&offset=0&r=true";
 
 const stackoverflow = new Stackoverflow();
 
@@ -86,25 +89,7 @@ describe("Stackoverflow", () => {
       expect(description).toMatchSnapshot();
     });
   });
-  describe("getLocationDetails", () => {
-    it("should work", async () => {
-      const page = await browser.newPage();
-      await page.goto(JOB_REMOTE_URL_WITH_REMOTE_DETAILS_WITHOUT_SALARY);
-      const remoteDetails = await stackoverflow.getLocationDetails(page);
-      expect(remoteDetails).toEqual({
-        preferredLocation: "Berlin",
-        preferredTimeZone: 1,
-        preferredTimeZoneTolerance: 2,
-        raw: "(GMT+01:00) Berlin +/- 2 hours"
-      });
-    });
-    it("should work when there is no remote details", async () => {
-      const page = await browser.newPage();
-      await page.goto(JOB_REMOTE_URL_WITHOUT_REMOTE_DETAILS);
-      const remoteDetails = await stackoverflow.getLocationDetails(page);
-      expect(remoteDetails).toEqual({});
-    });
-  });
+
   describe("getSalaryDetails", () => {
     it("should work", async () => {
       const page = await browser.newPage();
@@ -115,8 +100,7 @@ describe("Stackoverflow", () => {
         equity: false,
         max: 60000,
         min: 35000,
-        raw:
-          "                                $35k - 60k                            "
+        raw: "$35k - 60k"
       });
     });
     it("should work when there is no salary", async () => {
@@ -133,9 +117,37 @@ describe("Stackoverflow", () => {
       const company = await stackoverflow.getCompany(page);
       expect(company).toEqual({
         displayName: "Bitfinex",
-        imageUrl: "https://i.stack.imgur.com/2iaF1.jpg",
-        url: "https://stackoverflow.com/jobs/companies/bitfinex"
+        imageUrl: "https://i.stack.imgur.com/2iaF1.jpg"
       });
+    });
+  });
+
+  describe("getLocationDetails", () => {
+    it("should work when there is a city and offset min and max", async () => {
+      const page = await browser.newPage();
+      await page.goto(
+        "https://stackoverflow.com/jobs/254903/senior-full-stack-developer-firebase-node-mothership?so=i&pg=1&offset=0&r=true"
+      );
+      // location should be: (GMT+02:00) Tallinn +/- 6 hours
+      const remoteDetails = await stackoverflow.getLocationDetails(page);
+      expect(remoteDetails).toEqual({
+        description: "(GMT+02:00) Tallinn +/- 6 hours",
+        timeZoneMax: 8,
+        timeZoneMin: -4
+      } as LocationDetailsInput);
+    });
+    it("should work when there is a city", async () => {
+      const page = await browser.newPage();
+      await page.goto(
+        "https://stackoverflow.com/jobs/228554/front-end-developer-javascript-angular-third-light?so=i&pg=1&offset=1&r=true"
+      );
+      // location should be: (GMT+00:00) London
+      const remoteDetails = await stackoverflow.getLocationDetails(page);
+      expect(remoteDetails).toEqual({
+        description: "(GMT+00:00) London ",
+        timeZoneMax: 0,
+        timeZoneMin: 0
+      } as LocationDetailsInput);
     });
   });
 });

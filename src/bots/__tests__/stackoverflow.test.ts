@@ -1,11 +1,9 @@
 import { Stackoverflow } from "../stackoverflow";
 
-const stackoverflow = new Stackoverflow();
-
 describe("Stackoverflow", () => {
-  describe("extractLocationDetails", () => {
+  describe("extractLocationDetailsFromText", () => {
     it("should work without tolerance", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails(
+      const remoteDetails = Stackoverflow.extractLocationDetailsFromText(
         "(GMT+00:00) London"
       );
       expect(remoteDetails).toEqual({
@@ -15,7 +13,7 @@ describe("Stackoverflow", () => {
       });
     });
     it("should work when there is no tolerance specified", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails(
+      const remoteDetails = Stackoverflow.extractLocationDetailsFromText(
         "(GMT+11:00) Eastern Time - Melbourne, Sydney"
       );
       expect(remoteDetails).toEqual({
@@ -25,7 +23,7 @@ describe("Stackoverflow", () => {
       });
     });
     it("should work with negative numbers", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails(
+      const remoteDetails = Stackoverflow.extractLocationDetailsFromText(
         "(GMT-10:00) London"
       );
       expect(remoteDetails).toEqual({
@@ -34,14 +32,27 @@ describe("Stackoverflow", () => {
         raw: "(GMT-10:00) London"
       });
     });
+    it("should work with negative numbers when there are offsets", () => {
+      // (GMT-08:00) Pacific Time +/- 6 hours
+      const remoteDetails = Stackoverflow.extractLocationDetailsFromText(
+        "(GMT-08:00) Pacific Time +/- 6 hours"
+      );
+      expect(remoteDetails).toEqual({
+        description: "(GMT-08:00) Pacific Time +/- 6 hours",
+        timeZoneMax: -2,
+        timeZoneMin: -14
+      });
+    });
     it("when the input is not valid", () => {
-      const remoteDetails = stackoverflow.extractLocationDetails("(GMT+00:00");
+      const remoteDetails = Stackoverflow.extractLocationDetailsFromText(
+        "(GMT+00:00"
+      );
       expect(remoteDetails).toEqual({ raw: "(GMT+00:00" });
     });
   });
   describe("extractSalaryDetails", () => {
     it("should work with messed up text", () => {
-      const salaryDetails = stackoverflow.extractSalaryDetails(`
+      const salaryDetails = Stackoverflow.extractSalaryDetails(`
                                 $130k - 165k
 
                                      | 
@@ -57,7 +68,7 @@ Equity                            `);
       });
     });
     it("should work without equity", () => {
-      const salaryDetails = stackoverflow.extractSalaryDetails("$50k - 80k ");
+      const salaryDetails = Stackoverflow.extractSalaryDetails("$50k - 80k ");
       expect(salaryDetails).toEqual({
         currency: "$",
         equity: false,
@@ -67,7 +78,7 @@ Equity                            `);
       });
     });
     it("should work with strange currencies", () => {
-      const salaryDetails = stackoverflow.extractSalaryDetails("BRL50k - 80k ");
+      const salaryDetails = Stackoverflow.extractSalaryDetails("BRL50k - 80k ");
       expect(salaryDetails).toEqual({
         currency: "BRL",
         equity: false,
@@ -77,13 +88,13 @@ Equity                            `);
       });
     });
     it("should not error with malformed input", () => {
-      const salaryDetails = stackoverflow.extractSalaryDetails("BRL50 - 80k ");
+      const salaryDetails = Stackoverflow.extractSalaryDetails("BRL50 - 80k ");
       expect(salaryDetails).toEqual({
         raw: "BRL50 - 80k "
       });
     });
     it("should work with falsy inputs", () => {
-      const salaryDetails = stackoverflow.extractSalaryDetails("");
+      const salaryDetails = Stackoverflow.extractSalaryDetails("");
       expect(salaryDetails).toEqual({
         raw: ""
       });

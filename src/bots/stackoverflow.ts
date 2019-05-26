@@ -2,10 +2,10 @@ import {
   Bot,
   CompanyDetails,
   JobDraft,
-  LocationDetails,
-  SalaryDetails
-} from "../lib/bot-manager";
-import { BotLogger } from "../lib/logger";
+  SalaryDetails,
+  TimezoneDetails
+} from "../bot-manager";
+import { BotLogger } from "../logger";
 import * as puppeteer from "puppeteer";
 import {
   getAttributeFromElement,
@@ -13,43 +13,75 @@ import {
   getInnerHtmlFromElement,
   getNextElement,
   getTextFromElement
-} from "../lib/puppeteer";
-import { getTimeAgoFromString, getTimeFromTimeAgo } from "../lib/date";
-import { removeQueryString } from "../lib/url/url";
+} from "../puppeteer";
+import { getTimeAgoFromString, getTimeFromTimeAgo } from "../date";
+import { removeQueryString } from "../url/url";
+import { LocationDetailsInput } from "../../graphql-types";
+import { getMarkdownFromHtml } from "../markdown";
+import { extractLocation } from "../location";
 
 export class Stackoverflow implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
     return `https://stackoverflow.com${relativeUrl}`;
   }
 
-  extractLocationDetails(remoteDetails: string): LocationDetails {
-    const result: LocationDetails = {
-      raw: remoteDetails
-    };
-    if (!remoteDetails) {
-      return result;
+  /**
+   * Will get a text like (GMT+02:00) Tallinn +/- 6 hours and return timezone
+   * details
+   * @param locationText
+   */
+  static extractLocationDetailsFromText(
+    locationText: string
+  ): LocationDetailsInput {
+    const defaultLocation = {
+      description: locationText
+    } as LocationDetailsInput;
+
+    if (!locationText) {
+      return {};
     }
-    const normalizedRemoteDetails = remoteDetails.replace(/(\r\n|\n|\r)/gm, "");
+    const normalizedRemoteDetails = locationText.replace(/(\r\n|\n|\r)/gm, "");
     // match should be something like this ["(GMT+00:00) London", "+", "00", "00", "London"]
-    const match1 = normalizedRemoteDetails.match(
-      /(?:\(GMT([+,-])(\d+):(\d+)\))\s*(.*)/
+
+    // Now, we have some options
+    // If the string is like:  "(GMT+01:00) Berlin +/- 4 hours"
+    // it will match this Regex: /\(GMT([+,-])(\d+):(\d+)\)\s+(.*)\s+((?:\+\/-) (\d+) hours)/
+    // If it is like: "(GMT+00:00) London" it will match another regex
+
+    // https://i.imgur.com/XoTN9ro.png
+    const remoteDetailsPattern1Match = normalizedRemoteDetails.match(
+      /\(GMT([+,-])(\d+):(\d+)\)\s+(.*)\s+((?:\+\/-) (\d+) hours)/
     );
-    if (!match1) {
-      return result;
+
+    if (remoteDetailsPattern1Match) {
+      const sign = remoteDetailsPattern1Match[1];
+      let timeZone = parseInt(remoteDetailsPattern1Match[2]);
+      if (sign === "-") {
+        timeZone = -timeZone;
+      }
+      return {
+        ...defaultLocation,
+        timeZoneMin: timeZone - parseInt(remoteDetailsPattern1Match[6]),
+        timeZoneMax: timeZone + parseInt(remoteDetailsPattern1Match[6])
+      };
     }
-    result.preferredTimeZone = parseInt(`${match1[1]}${match1[2]}`);
-    const rawLocation = match1[4];
-    const match2 = rawLocation.match(/(.*)(?:\+\/-\s+(\d+)\s+hours)/);
-    if (!match2) {
-      result.preferredLocation = rawLocation;
-      return result;
+
+    const remoteDetailsPattern2Match = normalizedRemoteDetails.match(
+      /\(GMT([+,-])(\d+):(\d+)\)\s+(.*)/
+    );
+
+    if (remoteDetailsPattern2Match) {
+      const timeZone = parseInt(remoteDetailsPattern2Match[2]);
+      return {
+        ...defaultLocation,
+        timeZoneMin: timeZone,
+        timeZoneMax: timeZone
+      };
     }
-    result.preferredLocation = match2[1].trim();
-    result.preferredTimeZoneTolerance = parseInt(match2[2]);
-    return result;
+    return defaultLocation;
   }
 
-  extractSalaryDetails(salary: string): SalaryDetails {
+  static extractSalaryDetails(salary: string): SalaryDetails {
     const result: SalaryDetails = {
       raw: salary
     };
@@ -125,8 +157,14 @@ export class Stackoverflow implements Bot {
     return html;
   }
 
-  async getLocationDetails(page: puppeteer.Page): Promise<LocationDetails> {
-    const result: LocationDetails = {};
+  async getLocationDetails(
+    page: puppeteer.Page
+  ): Promise<LocationDetailsInput> {
+    const description = getMarkdownFromHtml(
+      await this.getDescriptionHtml(page)
+    );
+    const result: LocationDetailsInput =
+      extractLocation(description, true) || {};
     const overview = await page.$("#overview-items");
     if (!overview) {
       throw new Error("overview was not supposed to be null");
@@ -143,17 +181,20 @@ export class Stackoverflow implements Bot {
     if (!remoteDetails) {
       throw new Error("locationDetails was not supposed to be null");
     }
-    const timeZoneTitle = await getElementWithExactText(
+    const preferredTimezoneTitle = await getElementWithExactText(
       remoteDetails,
       "Preferred Timezone:"
     );
-    if (timeZoneTitle) {
-      const timeZone = await getNextElement(page, timeZoneTitle);
+    if (preferredTimezoneTitle) {
+      const timeZone = await getNextElement(page, preferredTimezoneTitle);
       if (!timeZone) {
         throw new Error("timeZone was not supposed to be null");
       }
-      const timeZoneText = await getTextFromElement(page, timeZone);
-      return this.extractLocationDetails(timeZoneText);
+      const locationText = await getTextFromElement(page, timeZone);
+      return {
+        ...(Stackoverflow.extractLocationDetailsFromText(locationText) || {}),
+        ...result
+      };
     }
     return result;
   }
@@ -169,7 +210,7 @@ export class Stackoverflow implements Bot {
       return result;
     }
     const salaryText = await getTextFromElement(page, salary);
-    return this.extractSalaryDetails(salaryText);
+    return Stackoverflow.extractSalaryDetails(salaryText);
   }
 
   async getJobDrafts(

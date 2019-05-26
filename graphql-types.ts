@@ -17,17 +17,7 @@ export interface JobInput {
 
   companyId: string;
 
-  locationRaw?: Maybe<string>;
-
-  locationRequired?: Maybe<string>;
-
-  locationPreferred?: Maybe<string>;
-
-  locationPreferredTimezone?: Maybe<number>;
-
-  locationPreferredTimezoneTolerance?: Maybe<number>;
-
-  locationTag?: Maybe<string>;
+  locationDetails?: Maybe<LocationDetailsInput>;
 
   salaryRaw?: Maybe<string>;
 
@@ -44,6 +34,20 @@ export interface JobInput {
   url: string;
 
   source: string;
+}
+
+export interface LocationDetailsInput {
+  description?: Maybe<string>;
+
+  acceptedRegions?: Maybe<string[]>;
+
+  acceptedCountries?: Maybe<string[]>;
+
+  timeZoneMin?: Maybe<number>;
+
+  timeZoneMax?: Maybe<number>;
+
+  headquartersLocation?: Maybe<string>;
 }
 
 export interface CompanyInput {

@@ -1,21 +1,18 @@
 import { BotLogger, Logger } from "./logger";
 import colors from "colors";
 import puppeteer from "puppeteer";
-import { JobInput } from "../graphql-types";
+import { JobInput, LocationDetailsInput } from "../graphql-types";
 import { addCompany, addJob, getCompany, getJob } from "./graphql-client";
 import { getMarkdownFromHtml } from "./markdown";
 import { launchPuppeteer } from "./puppeteer";
-import { extractLocationTag } from "./location";
 
 const RATE_LIMIT = 30;
 
-export interface LocationDetails {
-  raw?: string;
-  requiredLocation?: string;
-  preferredLocation?: string;
-  preferredTimeZone?: number;
-  preferredTimeZoneTolerance?: number;
-  locationTag?: string;
+export interface TimezoneDetails {
+  preferredTimeZoneMin?: number;
+  preferredTimeZoneMax?: number;
+  requiredCountryCodes?: string;
+  requiredTimeZoneMin?: number;
 }
 
 export interface SalaryDetails {
@@ -47,25 +44,28 @@ export interface Bot {
 
   shouldCapture(page: puppeteer.Page): Promise<boolean>;
 
-  getTitle(page: puppeteer.Page, draft: JobDraft): Promise<string>;
+  getTitle(page: puppeteer.Page, draft: JobDraft | null): Promise<string>;
 
-  getTags(page: puppeteer.Page, draft: JobDraft): Promise<string[]>;
+  getTags(page: puppeteer.Page, draft: JobDraft | null): Promise<string[]>;
 
-  getDescriptionHtml(page: puppeteer.Page, draft: JobDraft): Promise<string>;
+  getDescriptionHtml(
+    page: puppeteer.Page,
+    draft: JobDraft | null
+  ): Promise<string>;
 
   getUtcPublishedAt(
     page: puppeteer.Page,
-    draft: JobDraft
+    draft: JobDraft | null
   ): Promise<Date | null>;
 
   getLocationDetails(
     page: puppeteer.Page,
-    draft: JobDraft
-  ): Promise<LocationDetails>;
+    draft: JobDraft | null
+  ): Promise<LocationDetailsInput>;
 
   getSalaryDetails(
     page: puppeteer.Page,
-    draft: JobDraft
+    draft: JobDraft | null
   ): Promise<SalaryDetails>;
 
   getCompany(page: puppeteer.Page, draft: JobDraft): Promise<CompanyDetails>;
@@ -119,7 +119,7 @@ export class BotManager {
   async wrapCall<T>(
     call: () => Promise<T>,
     defaultValue: T | null,
-    logKey: string,
+    logKey: string | null,
     url: string,
     logger: BotLogger
   ) {
@@ -198,7 +198,7 @@ export class BotManager {
         return;
       }
 
-      const locationDetails = await this.wrapCall<LocationDetails>(
+      const locationDetails = await this.wrapCall<LocationDetailsInput>(
         () => bot.getLocationDetails(page, draft),
         {},
         "getLocationDetails",
@@ -225,7 +225,7 @@ export class BotManager {
       const getCompanyResult = await getCompany({
         displayName: companyDetails.displayName
       });
-      let companyId: string;
+      let companyId: string | null;
       if (getCompanyResult.data.getCompany) {
         companyId = getCompanyResult.data.getCompany.id;
       } else {
@@ -242,20 +242,15 @@ export class BotManager {
           );
           return;
         }
-        companyId = addCompanyResult.data.addCompany.id;
+        companyId =
+          addCompanyResult.data && addCompanyResult.data.addCompany
+            ? addCompanyResult.data.addCompany.id
+            : null;
       }
 
       if (!companyId) {
         throw Error("COMPANY SHOULD NOT BE NULL");
       }
-
-      const locationTag =
-        locationDetails.locationTag ||
-        extractLocationTag(
-          locationDetails ? locationDetails.requiredLocation : "",
-          title,
-          description
-        );
 
       const job: JobInput = {
         title,
@@ -267,19 +262,13 @@ export class BotManager {
           ? publishedAt.toISOString()
           : new Date().toISOString(),
         url: draft.link,
-        locationRequired: locationDetails.requiredLocation,
-        locationPreferred: locationDetails.preferredLocation,
-        locationPreferredTimezone: locationDetails.preferredTimeZone,
-        locationPreferredTimezoneTolerance:
-          locationDetails.preferredTimeZoneTolerance,
-        locationRaw: locationDetails.raw,
+        locationDetails: locationDetails,
         salaryRaw: salaryDetails.raw,
         salaryExact: salaryDetails.exact,
         salaryMin: salaryDetails.min,
         salaryMax: salaryDetails.max,
         salaryCurrency: salaryDetails.currency,
         salaryEquity: salaryDetails.equity,
-        locationTag: locationTag,
         source
       };
 

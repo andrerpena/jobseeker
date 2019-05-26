@@ -1,59 +1,54 @@
-import {
-  Bot,
-  CompanyDetails,
-  JobDraft,
-  LocationDetails,
-  SalaryDetails
-} from "../lib/bot-manager";
+import { Bot, CompanyDetails, JobDraft, SalaryDetails } from "../bot-manager";
 import * as puppeteer from "puppeteer";
-import { Logger } from "../lib/logger";
+import { Logger } from "../logger";
 import {
+  FluentPuppeteerNode,
   getAttributeFromElement,
   getInnerHtmlFromElement,
-  getTextFromElement
-} from "../lib/puppeteer";
-import { getMarkdownFromHtml, removeMarkdown } from "../lib/markdown";
-import { extractTags } from "../lib/tag-extractor";
+  getTextFromElement,
+  query
+} from "../puppeteer";
+import { getMarkdownFromHtml, removeMarkdown } from "../markdown";
+import { extractTags } from "../tag-extractor";
+import { LocationDetailsInput } from "../../graphql-types";
+import { extractLocation } from "../location";
+import { countries } from "../location/countries";
 
 export class WeWorkRemotely implements Bot {
   buildAbsoluteUrl(relativeUrl: string) {
     return `https://weworkremotely.com${relativeUrl}`;
   }
 
-  getLocationFromText(text: string) {
-    const match = text.match(/Must be located:(.*)/);
-    if (match) {
-      return match[1].trim();
-    }
-    return null;
-  }
-
   async getCompany(
     page: puppeteer.Page,
-    draft: JobDraft
+    draft: JobDraft | null
   ): Promise<CompanyDetails> {
-    const companyNameElement = await page.$(
-      ".listing-header-container .company"
-    );
-    const companyName = await getTextFromElement(page, companyNameElement);
+    const company = await query(page)
+      .$(".company-card")
+      .$("h2 a")
+      .getInnerHtml();
+    const imageUrl = await query(page)
+      .$(".company-card")
+      .$(".listing-logo img")
+      .getAttribute("src");
 
-    const companyLogoElement = await page.$(
-      ".listing-header .listing-logo img"
-    );
+    if (company.error) {
+      throw company.error;
+    }
 
-    const companyLogoUrl = companyLogoElement
-      ? await getAttributeFromElement(page, companyLogoElement, "src")
-      : "";
+    if (imageUrl.error) {
+      throw imageUrl.error;
+    }
 
     return {
-      displayName: companyName,
-      imageUrl: companyLogoUrl
+      displayName: company.value || "",
+      imageUrl: imageUrl.value || ""
     };
   }
 
   async getDescriptionHtml(
     page: puppeteer.Page,
-    draft: JobDraft
+    draft: JobDraft | null
   ): Promise<string> {
     const description = await page.$(".listing-container");
     const html = await getInnerHtmlFromElement(page, description);
@@ -66,7 +61,7 @@ export class WeWorkRemotely implements Bot {
   async getJobDrafts(
     logger: Logger,
     browser: puppeteer.Browser
-  ): Promise<Array<JobDraft | null>> {
+  ): Promise<Array<JobDraft>> {
     const page = await browser.newPage();
     await page.goto(
       "https://weworkremotely.com/categories/remote-programming-jobs"
@@ -95,18 +90,27 @@ export class WeWorkRemotely implements Bot {
 
   async getLocationDetails(
     page: puppeteer.Page,
-    draft: JobDraft
-  ): Promise<LocationDetails> {
-    const regionElement = await page.$(".listing-header-container .region");
-    if (regionElement) {
-      const locationRaw = await getTextFromElement(page, regionElement);
-      const location = this.getLocationFromText(locationRaw);
-      return {
-        requiredLocation: location,
-        raw: locationRaw
-      };
-    }
-    return {};
+    draft: JobDraft | null
+  ): Promise<LocationDetailsInput> {
+    const description = getMarkdownFromHtml(
+      await this.getDescriptionHtml(page, draft)
+    );
+
+    const resultFromText: LocationDetailsInput =
+      extractLocation(description, true) || {};
+
+    // On we-work-remotely, the locations are on the last tags, when they exist,
+    const lastTagText = (await query(page)
+      .$(".listing-header-container")
+      .$lastChild()
+      .getInnerHtml()).value;
+
+    const resultFromTag = extractLocation(lastTagText || "", false);
+
+    return {
+      ...resultFromText,
+      ...resultFromTag
+    };
   }
 
   getName(): string {
@@ -120,20 +124,26 @@ export class WeWorkRemotely implements Bot {
     return {};
   }
 
-  async getTags(page: puppeteer.Page, draft: JobDraft): Promise<string[]> {
+  async getTags(
+    page: puppeteer.Page,
+    draft: JobDraft | null
+  ): Promise<string[]> {
     const descriptionHtml = await this.getDescriptionHtml(page, draft);
     const description = removeMarkdown(getMarkdownFromHtml(descriptionHtml));
     return extractTags(description).map(t => t.name);
   }
 
-  async getTitle(page: puppeteer.Page, draft: JobDraft): Promise<string> {
+  async getTitle(
+    page: puppeteer.Page,
+    draft: JobDraft | null
+  ): Promise<string> {
     const header = await page.$(".listing-header-container h1");
     return (await getTextFromElement(page, header)).trim();
   }
 
   async getUtcPublishedAt(
     page: puppeteer.Page,
-    draft: JobDraft
+    draft: JobDraft | null
   ): Promise<Date | null> {
     const header = await page.$(".listing-header-container time");
     const dateString = await getAttributeFromElement(page, header, "datetime");

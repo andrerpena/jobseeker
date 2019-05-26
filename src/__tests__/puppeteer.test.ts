@@ -1,6 +1,8 @@
 import puppeteer from "puppeteer";
 import {
+  getAttributeFromElement,
   getElementWithExactText,
+  getFirstChild,
   getInnerHtmlFromElement,
   getNextElement,
   getTextFromElement,
@@ -67,6 +69,28 @@ describe("puppeteer", () => {
           '            <div class="item">item 3</div>'
       );
       // list-1
+    });
+  });
+  describe("getAttributeFromElement", () => {
+    it("should work", async () => {
+      const page = await browser.newPage();
+      await page.goto(`data:text/html,${html}`);
+      const element = await page.$(".list-1 > div:first-child");
+      const attribute = await getAttributeFromElement(page, element, "class");
+      expect(attribute).toEqual("item");
+    });
+  });
+  describe("getFirstChild", () => {
+    it("should work", async () => {
+      const page = await browser.newPage();
+      await page.goto(`data:text/html,${html}`);
+      const element = await page.$(".list-1");
+      if (!element) {
+        throw new Error("element should not be null");
+      }
+      const firstChild = await getFirstChild(page, element);
+      const text = await getInnerHtmlFromElement(page, firstChild);
+      expect(text).toEqual("item 1");
     });
   });
 });
