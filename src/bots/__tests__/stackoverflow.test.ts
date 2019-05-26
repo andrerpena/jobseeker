@@ -7,9 +7,9 @@ describe("Stackoverflow", () => {
         "(GMT+00:00) London"
       );
       expect(remoteDetails).toEqual({
-        preferredLocation: "London",
-        preferredTimeZone: 0,
-        raw: "(GMT+00:00) London"
+        description: "(GMT+00:00) London",
+        timeZoneMax: 0,
+        timeZoneMin: 0
       });
     });
     it("should work when there is no tolerance specified", () => {
@@ -17,9 +17,9 @@ describe("Stackoverflow", () => {
         "(GMT+11:00) Eastern Time - Melbourne, Sydney"
       );
       expect(remoteDetails).toEqual({
-        preferredLocation: "Eastern Time - Melbourne, Sydney",
-        preferredTimeZone: 11,
-        raw: "(GMT+11:00) Eastern Time - Melbourne, Sydney"
+        description: "(GMT+11:00) Eastern Time - Melbourne, Sydney",
+        timeZoneMax: 11,
+        timeZoneMin: 11
       });
     });
     it("should work with negative numbers", () => {
@@ -27,9 +27,9 @@ describe("Stackoverflow", () => {
         "(GMT-10:00) London"
       );
       expect(remoteDetails).toEqual({
-        preferredLocation: "London",
-        preferredTimeZone: -10,
-        raw: "(GMT-10:00) London"
+        description: "(GMT-10:00) London",
+        timeZoneMax: 10,
+        timeZoneMin: 10
       });
     });
     it("should work with negative numbers when there are offsets", () => {
@@ -47,7 +47,7 @@ describe("Stackoverflow", () => {
       const remoteDetails = Stackoverflow.extractLocationDetailsFromText(
         "(GMT+00:00"
       );
-      expect(remoteDetails).toEqual({ raw: "(GMT+00:00" });
+      expect(remoteDetails).toEqual({ description: "(GMT+00:00" });
     });
   });
   describe("extractSalaryDetails", () => {
@@ -63,8 +63,7 @@ Equity                            `);
         equity: true,
         max: 165000,
         min: 130000,
-        raw:
-          "                                $130k - 165k                                     | Equity                            "
+        raw: "$130k - 165k                                     | Equity"
       });
     });
     it("should work without equity", () => {
@@ -74,7 +73,7 @@ Equity                            `);
         equity: false,
         max: 80000,
         min: 50000,
-        raw: "$50k - 80k "
+        raw: "$50k - 80k"
       });
     });
     it("should work with strange currencies", () => {
@@ -84,7 +83,7 @@ Equity                            `);
         equity: false,
         max: 80000,
         min: 50000,
-        raw: "BRL50k - 80k "
+        raw: "BRL50k - 80k"
       });
     });
     it("should not error with malformed input", () => {
