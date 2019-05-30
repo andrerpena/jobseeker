@@ -120,6 +120,17 @@ describe("Stackoverflow", () => {
         imageUrl: "https://i.stack.imgur.com/2iaF1.jpg"
       });
     });
+    it("should work with the image that was failing", async () => {
+      const page = await browser.newPage();
+      await page.goto(
+        "https://stackoverflow.com/jobs/160819/oncall-devops-sre-for-big-data-infrastructure-ahrefs"
+      );
+      const company = await stackoverflow.getCompany(page);
+      expect(company).toEqual({
+        displayName: "Ahrefs",
+        imageUrl: "https://i.stack.imgur.com/Us3zQ.jpg"
+      });
+    });
   });
 
   describe("getLocationDetails", () => {

@@ -1,15 +1,21 @@
 import { ElementHandle, Page } from "puppeteer";
 import puppeteer from "puppeteer";
 
-export interface Queryable {
+export interface QueryableXPath {
   $x(expression: string): Promise<ElementHandle[]>;
+}
+
+export interface Queryable {
+  $(selector: string): Promise<ElementHandle | null>;
+
+  $$(selector: string): Promise<ElementHandle[]>;
 }
 
 export async function getTextFromElement(
   page: Page,
   element: ElementHandle | null
 ) {
-  return page.evaluate(element => element.textContent, element);
+  return page.evaluate(element => element.innerText, element);
 }
 
 export async function getAttributeFromElement(
@@ -57,7 +63,7 @@ export async function getLastChild(page: Page, element: ElementHandle) {
 }
 
 export async function getElementWithExactText(
-  frameBase: Queryable | ElementHandle | Page,
+  frameBase: QueryableXPath | ElementHandle | Page,
   text: string
 ) {
   const elements = await frameBase.$x(`//*[text()='${text}']`);
@@ -65,6 +71,31 @@ export async function getElementWithExactText(
     return elements[0];
   }
   return null;
+}
+
+export async function getStyleFromElement(
+  page: Page,
+  elementHandle: ElementHandle,
+  cssProperty: string
+): Promise<string> {
+  // page.evaluate evaluates the given function from inside the browser context
+  // so elementHandle and cssProperty are not available in the scope of the function.
+  // That is why we pass it. Puppeteer automatically converts the elementHandle
+  // into the correct DOM element, though
+  return page.evaluate(
+    (element, property) =>
+      window.getComputedStyle(element).getPropertyValue(property),
+    elementHandle,
+    cssProperty
+  );
+}
+
+export async function selectorExists(
+  queryable: Queryable,
+  selector: string
+): Promise<boolean> {
+  const elements = await queryable.$(selector);
+  return elements !== null;
 }
 
 export async function launchPuppeteer(): Promise<puppeteer.Browser> {
@@ -81,6 +112,11 @@ export interface FluentPuppeteerNodeError {
 export interface FluentPuppeteerValue {
   error?: FluentPuppeteerNodeError;
   value?: string;
+}
+
+export interface FluentPuppeteerCSSStyleDeclaration {
+  error?: FluentPuppeteerNodeError;
+  value?: CSSStyleDeclaration;
 }
 
 export class FluentPuppeteerState {
@@ -113,6 +149,18 @@ export class FluentPuppeteerNode {
     this.pendingState = Promise.resolve<FluentPuppeteerState>(
       new FluentPuppeteerState(page, currentElement || null, 0, error)
     );
+  }
+
+  $element(element: ElementHandle): FluentPuppeteerNode {
+    this.pendingState = this.pendingState.then(
+      async (state: FluentPuppeteerState) => {
+        if (state.error) {
+          return state;
+        }
+        return new FluentPuppeteerState(state.page, element, state.step + 1);
+      }
+    );
+    return this;
   }
 
   $(selector: string): FluentPuppeteerNode {
@@ -336,6 +384,56 @@ export class FluentPuppeteerNode {
         error: {
           message: `Uncaught exception: ${ex}`
         }
+      };
+    }
+  }
+
+  async getInnerText(): Promise<FluentPuppeteerValue> {
+    try {
+      const state = await this.pendingState;
+      if (state.error) {
+        return {
+          error: state.error
+        };
+      }
+      if (state.currentElement === null) {
+        throw new Error("state.currentElement should not be null");
+      }
+      const value = await getTextFromElement(state.page, state.currentElement);
+      return {
+        error: state.error,
+        value: value
+      };
+    } catch (ex) {
+      return {
+        error: {
+          message: `Uncaught exception: ${ex}`
+        }
+      };
+    }
+  }
+
+  async getComputedStyle(cssProperty: string): Promise<FluentPuppeteerValue> {
+    try {
+      const state = await this.pendingState;
+      if (state.error) {
+        return {
+          error: state.error
+        };
+      }
+      if (state.currentElement === null) {
+        throw new Error("state.currentElement should not be null");
+      }
+      return {
+        value: await getStyleFromElement(
+          state.page,
+          state.currentElement,
+          cssProperty
+        )
+      };
+    } catch (ex) {
+      return {
+        error: ex
       };
     }
   }

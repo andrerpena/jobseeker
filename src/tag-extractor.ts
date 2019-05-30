@@ -61,6 +61,8 @@ export interface Extractor {
 export type ExtractionMap = { [key: string]: Extractor };
 
 const tagExtractionMap: ExtractionMap = {
+  architecture: { tokens: ["architecture", "architect"] },
+  bigdata: { tokens: ["big data", "big-data"] },
   "user-experience": { tokens: ["user-experience", "ux"] },
   azure: { tokens: ["azure"] },
   "ecmascript-6": { tokens: ["es6", "ecmascript-6"] },

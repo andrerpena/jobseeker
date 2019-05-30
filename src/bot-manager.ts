@@ -26,12 +26,12 @@ export interface SalaryDetails {
 
 export interface CompanyDetails {
   displayName: string;
-  imageUrl: string;
+  imageUrl: string | null;
 }
 
 export interface JobDraft {
   link: string;
-  draft: any;
+  draft?: any;
 }
 
 export interface Bot {
