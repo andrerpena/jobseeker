@@ -6,9 +6,9 @@ import { RemoteOk } from "./src/bots/remoteok";
 
 const botManager = new BotManager();
 botManager.register(new RemoteOk());
-// botManager.register(new AuthenticJobs());
-// botManager.register(new Stackoverflow());
-// botManager.register(new WeWorkRemotely());
+botManager.register(new AuthenticJobs());
+botManager.register(new Stackoverflow());
+botManager.register(new WeWorkRemotely());
 botManager
   .run()
   .catch(ex => console.log(ex))
