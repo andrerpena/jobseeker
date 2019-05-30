@@ -139,7 +139,9 @@ describe("puppeteer", () => {
       if (!backgroundColor) {
         throw new Error("no value");
       }
-      expect(backgroundColor.value).toEqual("bla");
+      expect(backgroundColor.value).toEqual(
+        'url("https://remote.io/something.png")'
+      );
     });
   });
 });
