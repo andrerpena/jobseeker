@@ -61,6 +61,8 @@ export interface Extractor {
 export type ExtractionMap = { [key: string]: Extractor };
 
 const tagExtractionMap: ExtractionMap = {
+  terraform: { tokens: ["terraform"] },
+  solidity: { tokens: ["solidity"] },
   architecture: { tokens: ["architecture", "architect"] },
   bigdata: { tokens: ["big data", "big-data"] },
   "user-experience": { tokens: ["user-experience", "ux"] },
