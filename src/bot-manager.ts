@@ -112,8 +112,10 @@ export class BotManager {
     this.browserPromise = launchPuppeteer();
   }
 
-  register(bot: Bot) {
-    this.bots.push(bot);
+  register(bot: Bot, condition: boolean = true) {
+    if (condition) {
+      this.bots.push(bot);
+    }
   }
 
   async wrapCall<T>(
