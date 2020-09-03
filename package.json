@@ -31,7 +31,7 @@
     "cross-fetch": "^3.0.1",
     "dotenv": "^7.0.0",
     "graphql": "^14.1.1",
-    "graphql-code-generator": "^0.17.0",
+    "graphql-code-generator": "^0.18.2",
     "graphql-codegen-introspection": "^0.17.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.25",
