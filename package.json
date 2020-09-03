@@ -35,7 +35,7 @@
     "graphql-codegen-introspection": "^0.17.0",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.25",
-    "puppeteer": "^1.11.0",
+    "puppeteer": "^1.13.0",
     "react-apollo": "^2.4.1",
     "remove-markdown": "^0.3.0",
     "rss-parser": "^3.5.3",
