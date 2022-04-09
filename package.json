@@ -33,7 +33,7 @@
     "graphql": "^14.1.1",
     "graphql-code-generator": "^0.17.0",
     "graphql-codegen-introspection": "^0.17.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "moment-timezone": "^0.5.25",
     "puppeteer": "^1.11.0",
     "react-apollo": "^2.4.1",
